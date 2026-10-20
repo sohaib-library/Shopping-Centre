@@ -55,3 +55,15 @@ Final Total: Rs. 228000
 Order #3 | Name: Ahmed Khan
 Final Total: Rs. 256500
 --------------------------------------
+Order #1 | Name: Guest Customer
+Final Total: Rs. 228000
+--------------------------------------
+Order #2 | Name: Guest Customer
+Final Total: Rs. 42750
+--------------------------------------
+Order #1 | Name: sohaib
+Final Total: Rs. 42750
+--------------------------------------
+Order #2 | Name: Guest
+Final Total: Rs. 6175
+--------------------------------------

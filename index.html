@@ -1548,10 +1548,48 @@
             color: white;
         }
 
-        #appShell {
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
+        /* =========================================
+           INVOICE MODAL & PRINT STYLES
+           ========================================= */
+        @keyframes invoiceFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96) translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        #invoiceModal .invoice-paper {
+            animation: invoiceFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #invoiceModal, #invoiceModal * {
+                visibility: visible !important;
+            }
+            #invoiceModal {
+                position: absolute !important;
+                inset: 0 !important;
+                background: white !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            .invoice-paper {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -1766,6 +1804,16 @@
                         <span>Active Cart</span>
                     </div>
                     <span class="nav-badge" id="sidebarCartCount" style="background: #eff6ff; color: #2563eb;">0</span>
+                </li>
+
+                <li class="nav-item" onclick="showHistoryFromSidebar()" id="nav-history">
+                    <div class="nav-item-content">
+                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span id="navHistoryLabel">Order History & Invoices</span>
+                    </div>
+                    <span class="nav-badge" id="sidebarHistoryCount" style="background: #ecfdf5; color: #059669;">0</span>
                 </li>
             </ul>
         </div>
@@ -2175,6 +2223,251 @@
                 </div>
             </div>
 
+            <!-- VIEW 3: CUSTOMER ORDERS, INVOICES & TRANSCRIPT VIEW -->
+            <div id="customerHistoryView" class="admin-view-container" style="display: none;">
+                <!-- Header with Back Button and Quick Actions -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 24px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <button class="filter-btn" onclick="showCustomerView()" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+                                ← Back to Storefront
+                            </button>
+                            <span style="font-size: 13px; color: var(--text-muted);">|</span>
+                            <span class="badge" style="background: #eff6ff; color: #2563eb; font-weight: 700; padding: 4px 10px; border-radius: 20px; font-size: 12px;">
+                                👤 <span id="histUserLabel">Your Account Orders</span>
+                            </span>
+                        </div>
+                        <h2 style="font-size: 22px; font-weight: 800; color: var(--text-main); margin-top: 10px;">
+                            My Invoices & Purchase History
+                        </h2>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+                            Personalized sales records, official invoices, and purchase receipts for your account.
+                        </p>
+                    </div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <button class="filter-btn" onclick="fetchCustomerHistory(true)" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <svg style="inline-size: 14px; block-size: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span>Refresh Invoices</span>
+                        </button>
+                        <button class="add-cart-btn" onclick="downloadCustomerTranscript()" style="background-color: var(--primary); padding: 8px 16px;">
+                            <svg style="inline-size: 14px; block-size: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>Download All Receipts</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customer KPI Stats Grid -->
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #eff6ff; color: #2563eb;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="custStatOrdersCount">0</span>
+                            <span class="stat-title">My Total Orders</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #ecfdf5; color: #059669;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="custStatTotalSpent">Rs. 0</span>
+                            <span class="stat-title">Total Lifetime Spend</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fef3c7; color: #d97706;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-val" id="custStatSavings">Rs. 0</span>
+                            <span class="stat-title">Student Discount (5% Saved)</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: #fdf2f8; color: #db2777;">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-val" style="font-size: 15px; color: #059669;">Verified</span>
+                            <span class="stat-title">Customer-Only Privacy</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content: Invoices Grid / Table -->
+                <div id="custInvoicesContainer" class="admin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <div>
+                            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main);">My Purchase Invoices</h3>
+                            <p style="font-size: 12.5px; color: var(--text-muted);">All verified purchases and official invoices for your account.</p>
+                        </div>
+                    </div>
+                    <div id="custInvoicesList">
+                        <!-- Populated dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Single Invoice Detail Modal -->
+            <div id="invoiceModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div class="invoice-paper" style="background: white; border-radius: 20px; width: 100%; max-width: 620px; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3); border: 1px solid var(--border-subtle); overflow: hidden; position: relative;">
+                    
+                    <!-- Top Gradient Accent -->
+                    <div style="height: 6px; background: linear-gradient(90deg, #2563eb, #3b82f6, #10b981);"></div>
+
+                    <div style="padding: 28px 32px 32px 32px;">
+                        
+                        <!-- Top Header: Logo + Invoice Label + Close Button -->
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle);">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 20px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);">
+                                    N
+                                </div>
+                                <div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <h3 style="font-size: 19px; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -0.02em;">NovaCart</h3>
+                                        <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; border: 1px solid #bfdbfe;">RETAIL</span>
+                                    </div>
+                                    <p style="font-size: 12px; color: var(--text-muted); margin: 3px 0 0 0;">Official Sales Receipt & Tax Invoice</p>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="text-align: right;">
+                                    <span style="display: inline-block; background: #ecfdf5; color: #059669; font-weight: 800; font-size: 11.5px; padding: 4px 12px; border-radius: 20px; border: 1px solid #a7f3d0; letter-spacing: 0.03em;">
+                                        ✓ PAID IN FULL
+                                    </span>
+                                </div>
+                                <button onclick="closeInvoiceModal()" style="background: #f1f5f9; border: none; color: var(--text-muted); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; margin-left: 6px;">
+                                    ✕
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Invoice Information Cards Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; margin-bottom: 24px;">
+                            <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px;">
+                                <span style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Invoice Reference</span>
+                                <strong id="invModalOrderNum" style="font-size: 15px; color: var(--primary); font-weight: 800;">#ORD-1</strong>
+                            </div>
+
+                            <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px;">
+                                <span style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Billed Customer</span>
+                                <strong id="invModalCustomer" style="font-size: 14px; color: var(--text-main); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">Customer</strong>
+                            </div>
+
+                            <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 12px; padding: 12px 14px;">
+                                <span style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Date Verified</span>
+                                <strong id="invModalDate" style="font-size: 13.5px; color: var(--text-main); font-weight: 700;">Verified Purchase</strong>
+                            </div>
+                        </div>
+
+                        <!-- Itemized Summary Table -->
+                        <div style="border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
+                            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+                                <thead>
+                                    <tr style="background: #f8fafc; border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">
+                                        <th style="padding: 12px 16px; font-weight: 700;">Order Item / Description</th>
+                                        <th style="padding: 12px 16px; font-weight: 700; text-align: center;">Qty</th>
+                                        <th style="padding: 12px 16px; font-weight: 700; text-align: right;">Unit Price</th>
+                                        <th style="padding: 12px 16px; font-weight: 700; text-align: right;">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid var(--border-subtle);">
+                                        <td style="padding: 14px 16px;">
+                                            <div style="font-weight: 700; color: var(--text-main);" id="invModalItemTitle">Storefront Retail Purchase</div>
+                                            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">Verified item batch checked out via NovaCart Mall</div>
+                                        </td>
+                                        <td style="padding: 14px 16px; text-align: center; font-weight: 600; color: var(--text-main);">1</td>
+                                        <td style="padding: 14px 16px; text-align: right; color: var(--text-muted);" id="invModalItemUnitPrice">Rs. 0</td>
+                                        <td style="padding: 14px 16px; text-align: right; font-weight: 700; color: var(--text-main);" id="invModalItemTotal">Rs. 0</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- Financial Breakdown -->
+                            <div style="background: #fafafa; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
+                                    <span>Subtotal</span>
+                                    <span id="invModalSubtotal" style="font-weight: 600; color: var(--text-main);">Rs. 0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #059669;">
+                                    <span style="display: flex; align-items: center; gap: 5px;">
+                                        <span>Student Promotion Discount</span>
+                                        <span style="background: #ecfdf5; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 8px;">5% OFF</span>
+                                    </span>
+                                    <span id="invModalDiscount" style="font-weight: 700;">- Rs. 0</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted);">
+                                    <span>Sales Tax & Delivery Charges</span>
+                                    <span style="font-weight: 600; color: #059669;">FREE (Express)</span>
+                                </div>
+                                <div style="height: 1px; background: var(--border-subtle); margin: 4px 0;"></div>
+                                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                                    <div>
+                                        <span style="font-size: 14px; font-weight: 800; color: var(--text-main); display: block;">Total Amount Paid</span>
+                                        <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ Payment Completed via NovaCart Secure Checkout</span>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span id="invModalAmount" style="font-size: 22px; font-weight: 800; color: var(--primary); letter-spacing: -0.02em;">Rs. 0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Verification Seal & Guarantee Banner -->
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 22px;">
+                            <div style="width: 32px; height: 32px; background: #22c55e; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; flex-shrink: 0;">
+                                <svg style="inline-size: 18px; block-size: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <div style="font-size: 12px; color: #166534; line-height: 1.4;">
+                                <strong style="display: block; font-weight: 700;">Verified Customer Transaction</strong>
+                                This electronic receipt confirms verified payment in NovaCart Smart Shopping Mall.
+                            </div>
+                        </div>
+
+                        <!-- Hidden transcript compatibility element -->
+                        <pre id="invModalRawTranscript" style="display: none;"></pre>
+
+                        <!-- Action Buttons -->
+                        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--border-subtle);">
+                            <button class="filter-btn" onclick="closeInvoiceModal()" style="padding: 9px 20px; font-weight: 700; color: var(--text-muted);">
+                                Close
+                            </button>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="add-cart-btn" onclick="printInvoiceModal()" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 9px 22px; display: flex; align-items: center; gap: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+                                    <svg style="inline-size: 16px; block-size: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                    <span>Print / Save PDF</span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     </div> <!-- End #appShell -->
@@ -2514,7 +2807,7 @@
                 return;
             }
 
-            const name = document.getElementById("custName").value.trim() || "Guest Customer";
+            const name = (currentUser && currentUser.name) ? currentUser.name : (document.getElementById("custName").value.trim() || "Guest Customer");
             const checkoutBtn = document.getElementById("checkoutBtn");
             checkoutBtn.disabled = true;
             checkoutBtn.innerHTML = `<span>Processing Order...</span>`;
@@ -2551,11 +2844,12 @@
                 totalOrders += successCount;
                 document.getElementById("orderStat").innerText = totalOrders;
                 document.getElementById("metricOrders").innerText = totalOrders;
-                showToast(`Success! Bill generated for ${name} & saved to receipts.txt`, "success");
+                showToast(`Success! Invoice generated for ${name} & saved to receipts.txt`, "success");
                 cart = [];
                 renderCart();
                 fetchCatalog();
                 fetchHistory();
+                fetchCustomerHistory();
             }
         }
 
@@ -2748,6 +3042,267 @@
             }
         }
 
+        /* =========================================
+           CUSTOMER & ADMIN ORDER HISTORY CONTROLLER
+           ========================================= */
+        let currentCustOrders = [];
+        let currentCustTranscript = "";
+
+        function showHistoryFromSidebar() {
+            if (currentUser && currentUser.role === "admin") {
+                showAdminView();
+                switchAdminTab('orders', document.querySelectorAll(".admin-tab-btn")[1]);
+            } else {
+                showCustomerHistoryView();
+            }
+        }
+
+        function showCustomerHistoryView() {
+            document.getElementById("authPortalView").style.display = "none";
+            document.getElementById("appShell").style.display = "flex";
+            document.getElementById("customerStoreView").style.display = "none";
+            document.getElementById("adminPortalView").style.display = "none";
+            const custHistView = document.getElementById("customerHistoryView");
+            if (custHistView) custHistView.style.display = "block";
+            document.getElementById("topSearchBox").style.display = "none";
+            document.getElementById("topCartBtn").style.display = "none";
+            document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
+            const navHist = document.getElementById("nav-history");
+            if (navHist) navHist.classList.add("active");
+            document.getElementById("sidebar").classList.remove("open");
+
+            fetchCustomerHistory();
+        }
+
+        function switchCustHistoryTab(tabName) {
+            // Unused - tabs removed for streamlined invoice view
+        }
+
+        async function fetchCustomerHistory(notify) {
+            if (!currentUser) return;
+            const custName = currentUser.name || currentUser.username || "Guest";
+            const histUserLabel = document.getElementById("histUserLabel");
+            if (histUserLabel) histUserLabel.textContent = `Account: ${custName}`;
+
+            try {
+                const response = await fetch(`/api/history?customer=${encodeURIComponent(custName)}`);
+                const data = await response.json();
+                
+                const count = data.count || (data.orders ? data.orders.length : 0);
+                currentCustOrders = data.orders || [];
+                currentCustTranscript = data.history || "";
+
+                // Update sidebar count badge
+                const sideBadge = document.getElementById("sidebarHistoryCount");
+                if (sideBadge) sideBadge.textContent = count;
+
+                // Update metrics
+                const ordersCountEl = document.getElementById("custStatOrdersCount");
+                if (ordersCountEl) ordersCountEl.textContent = count;
+
+                let totalSpent = 0;
+                if (currentCustOrders.length > 0) {
+                    totalSpent = currentCustOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+                }
+                const spentEl = document.getElementById("custStatTotalSpent");
+                if (spentEl) spentEl.textContent = `Rs. ${totalSpent.toLocaleString()}`;
+
+                const savingsEl = document.getElementById("custStatSavings");
+                if (savingsEl) {
+                    const savings = Math.round(totalSpent * (0.05 / 0.95));
+                    savingsEl.textContent = `Rs. ${savings.toLocaleString()}`;
+                }
+
+                // Render Invoices Table
+                renderCustomerInvoices(currentCustOrders, custName);
+
+                // Update Transcript Terminal Box
+                const fileLog = document.getElementById("custFileLog");
+                if (fileLog) {
+                    fileLog.innerText = currentCustTranscript || "No transactions recorded yet.";
+                }
+
+                if (notify) {
+                    showToast(`Synced ${count} personal orders from receipts.txt!`, "success");
+                }
+            } catch(err) {
+                console.error("Failed to load customer history", err);
+            }
+        }
+
+        function renderCustomerInvoices(orders, custName) {
+            const container = document.getElementById("custInvoicesList");
+            if (!container) return;
+
+            if (!orders || orders.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 48px 16px; background: white; border-radius: 14px; border: 1px dashed var(--border-subtle);">
+                        <svg style="inline-size: 48px; block-size: 48px; color: #cbd5e1; margin: 0 auto 12px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h4 style="font-size: 16px; font-weight: 700; color: var(--text-main);">No Invoices on Record</h4>
+                        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px; margin-bottom: 16px;">
+                            No purchase transcripts have been recorded in receipts.txt for <strong>${custName}</strong> yet.
+                        </p>
+                        <button class="filter-btn active" onclick="showCustomerView()" style="font-weight: 700;">
+                            Browse Catalog & Place Order →
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Invoice Ref</th>
+                            <th>Customer Name</th>
+                            <th>Total Billed</th>
+                            <th>Student Discount</th>
+                            <th>Order Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            orders.forEach((o, idx) => {
+                const totalNum = parseFloat(o.total) || 0;
+                const origTotal = Math.round(totalNum / 0.95);
+                const discount = origTotal - totalNum;
+
+                html += `
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary);">#ORD-${o.orderNum || (idx + 1)}</strong>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="customer-avatar">${(o.customer || 'U').charAt(0).toUpperCase()}</div>
+                                <span style="font-weight: 700;">${o.customer || custName}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span style="font-size: 14px; font-weight: 800; color: var(--text-main);">Rs. ${totalNum.toLocaleString()}</span>
+                        </td>
+                        <td>
+                            <span style="display: inline-block; background: #ecfdf5; color: #059669; font-weight: 700; font-size: 11px; padding: 2px 8px; border-radius: 12px;">
+                                -5% Saved (Rs. ${discount.toLocaleString()})
+                            </span>
+                        </td>
+                        <td>
+                            <span style="display: inline-flex; align-items: center; gap: 4px; background: #eff6ff; color: #2563eb; font-weight: 700; font-size: 11.5px; padding: 2px 8px; border-radius: 12px;">
+                                ✓ Verified Order
+                            </span>
+                        </td>
+                        <td>
+                            <button class="filter-btn" onclick="viewSingleInvoice('${o.orderNum || (idx + 1)}', '${escapeJsString(o.customer || custName)}', ${totalNum})" style="padding: 5px 12px; font-size: 12px; font-weight: 700;">
+                                View Invoice 📄
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+        }
+
+        function escapeJsString(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function viewSingleInvoice(orderNum, customer, total) {
+            const totalNum = parseFloat(total) || 0;
+            const origTotal = Math.round(totalNum / 0.95);
+            const discount = origTotal - totalNum;
+            
+            const numEl = document.getElementById("invModalOrderNum");
+            if (numEl) numEl.textContent = `#ORD-${orderNum}`;
+            
+            const custEl = document.getElementById("invModalCustomer");
+            if (custEl) custEl.textContent = customer || "Customer";
+            
+            const dateEl = document.getElementById("invModalDate");
+            if (dateEl) {
+                const now = new Date();
+                dateEl.textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            }
+            
+            const titleEl = document.getElementById("invModalItemTitle");
+            if (titleEl) titleEl.textContent = `NovaCart Storefront Purchase (#ORD-${orderNum})`;
+            
+            const unitEl = document.getElementById("invModalItemUnitPrice");
+            if (unitEl) unitEl.textContent = `Rs. ${origTotal.toLocaleString()}`;
+            
+            const itemTotEl = document.getElementById("invModalItemTotal");
+            if (itemTotEl) itemTotEl.textContent = `Rs. ${origTotal.toLocaleString()}`;
+            
+            const subEl = document.getElementById("invModalSubtotal");
+            if (subEl) subEl.textContent = `Rs. ${origTotal.toLocaleString()}`;
+            
+            const discEl = document.getElementById("invModalDiscount");
+            if (discEl) discEl.textContent = `- Rs. ${discount.toLocaleString()}`;
+            
+            const amtEl = document.getElementById("invModalAmount");
+            if (amtEl) amtEl.textContent = `Rs. ${totalNum.toLocaleString()}`;
+            
+            const transcriptSnippet = `--------------------------------------\n` +
+                `NOVACART OFFICIAL RETAIL INVOICE\n` +
+                `Order Reference: #ORD-${orderNum}\n` +
+                `Customer Name: ${customer}\n` +
+                `Subtotal: Rs. ${origTotal.toLocaleString()}\n` +
+                `Promo Applied: 5% Student Discount (-Rs. ${discount.toLocaleString()})\n` +
+                `Final Amount Paid: Rs. ${totalNum.toLocaleString()}\n` +
+                `Transaction Status: Paid & Verified\n` +
+                `--------------------------------------`;
+            
+            const rawEl = document.getElementById("invModalRawTranscript");
+            if (rawEl) rawEl.textContent = transcriptSnippet;
+            
+            const modalEl = document.getElementById("invoiceModal");
+            if (modalEl) modalEl.style.display = "flex";
+        }
+
+        function closeInvoiceModal() {
+            document.getElementById("invoiceModal").style.display = "none";
+        }
+
+        function printInvoiceModal() {
+            window.print();
+        }
+
+        function copyCustTranscript() {
+            if (!currentCustTranscript) {
+                showToast("No transcript available to copy", "info");
+                return;
+            }
+            navigator.clipboard.writeText(currentCustTranscript).then(() => {
+                showToast("Personal transcript copied to clipboard!", "success");
+            }).catch(() => {
+                showToast("Could not access clipboard", "error");
+            });
+        }
+
+        function downloadCustomerTranscript() {
+            if (!currentCustTranscript) {
+                showToast("No transcript available to download", "info");
+                return;
+            }
+            const blob = new Blob([currentCustTranscript], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const userSlug = (currentUser && (currentUser.username || currentUser.name)) || 'customer';
+            a.href = url;
+            a.download = `novacart_receipts_${userSlug}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Downloaded your receipts transcript!", "success");
+        }
+
         function applyLoginState(user) {
             if (!user) {
                 showAuthPage();
@@ -2758,12 +3313,17 @@
             const topAvatar = document.getElementById("topNavAvatar");
             const topName = document.getElementById("topNavName");
             const topRole = document.getElementById("topNavRole");
+            const navHistoryLabel = document.getElementById("navHistoryLabel");
 
             if (topAvatar) topAvatar.innerText = (user.name || "U").charAt(0).toUpperCase();
             if (topName) topName.innerText = user.name || "User";
             if (topRole) {
                 topRole.innerText = user.role === "admin" ? "🛡️ SuperAdmin" : "Customer";
                 topRole.style.color = user.role === "admin" ? "#2563eb" : "var(--text-subtle)";
+            }
+
+            if (navHistoryLabel) {
+                navHistoryLabel.textContent = user.role === "admin" ? "All Orders & Logs" : "Order History & Invoices";
             }
 
             if (user.role === "admin") {
@@ -2785,6 +3345,8 @@
                 }
                 showCustomerView();
             }
+
+            fetchCustomerHistory();
         }
 
         function showAuthPage() {
@@ -2797,6 +3359,8 @@
             document.getElementById("authPortalView").style.display = "none";
             document.getElementById("appShell").style.display = "flex";
             document.getElementById("customerStoreView").style.display = "block";
+            const custHistView = document.getElementById("customerHistoryView");
+            if (custHistView) custHistView.style.display = "none";
             document.getElementById("adminPortalView").style.display = "none";
             document.getElementById("topSearchBox").style.display = "flex";
             document.getElementById("topCartBtn").style.display = "flex";
@@ -2806,17 +3370,20 @@
 
             // Pre-fill customer name in checkout
             if (currentUser && currentUser.name) {
-                const custInput = document.getElementById("customerName");
+                const custInput = document.getElementById("custName") || document.getElementById("customerName");
                 if (custInput) custInput.value = currentUser.name;
             }
 
             fetchCatalog();
+            fetchCustomerHistory();
         }
 
         function showAdminView() {
             document.getElementById("authPortalView").style.display = "none";
             document.getElementById("appShell").style.display = "flex";
             document.getElementById("customerStoreView").style.display = "none";
+            const custHistView = document.getElementById("customerHistoryView");
+            if (custHistView) custHistView.style.display = "none";
             document.getElementById("adminPortalView").style.display = "flex";
             document.getElementById("topSearchBox").style.display = "none";
             document.getElementById("topCartBtn").style.display = "none";

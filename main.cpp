@@ -525,26 +525,121 @@ int main() {
         }
     });
 
-    // API to get history
+    // API to get history (All for admin, or filtered by customer for user-side)
     svr.Get("/api/history", [&](const httplib::Request& req, httplib::Response& res) {
-        ifstream file("receipts.txt");
-        string history = "No history available.";
-        if (file.is_open()) {
-            stringstream buffer;
-            buffer << file.rdbuf();
-            history = buffer.str();
-            file.close();
+        string targetCustomer = "";
+        if (req.has_param("customer")) {
+            targetCustomer = req.get_param_value("customer");
+        } else if (req.has_header("X-Customer-User")) {
+            targetCustomer = req.get_header_value("X-Customer-User");
         }
-        
+
+        auto trim = [](string s) -> string {
+            while (!s.empty() && (s.back() == ' ' || s.back() == '\t' || s.back() == '\r' || s.back() == '\n')) s.pop_back();
+            size_t start = 0;
+            while (start < s.length() && (s[start] == ' ' || s[start] == '\t' || s[start] == '\r' || s[start] == '\n')) start++;
+            return s.substr(start);
+        };
+
+        auto toLower = [](string s) -> string {
+            for (char& c : s) c = tolower(c);
+            return s;
+        };
+
+        targetCustomer = trim(targetCustomer);
+        string lowerTarget = toLower(targetCustomer);
+
+        ifstream file("receipts.txt");
+        if (!file.is_open()) {
+            res.set_content("{\"status\": \"success\", \"history\": \"No history available.\", \"orders\": [], \"count\": 0}", "application/json");
+            return;
+        }
+
+        string line;
+        string currentBlock = "";
+        string currentCustomer = "";
+        string currentOrderNum = "";
+        float currentTotal = 0.0f;
+        string filteredHistory = "";
+        vector<OrderRecord> matchedOrders;
+
+        while (getline(file, line)) {
+            currentBlock += line + "\n";
+            if (line.find("Order #") == 0) {
+                size_t hashPos = line.find("#");
+                size_t barPos = line.find("|");
+                size_t namePos = line.find("Name: ");
+                if (hashPos != string::npos && barPos != string::npos) {
+                    currentOrderNum = trim(line.substr(hashPos + 1, barPos - (hashPos + 1)));
+                }
+                if (namePos != string::npos) {
+                    currentCustomer = trim(line.substr(namePos + 6));
+                }
+            } else if (line.find("Final Total: Rs. ") == 0) {
+                string totalStr = line.substr(17);
+                try {
+                    currentTotal = stof(totalStr);
+                } catch (...) {
+                    currentTotal = 0.0f;
+                }
+            } else if (line.find("---") != string::npos) {
+                bool match = false;
+                if (lowerTarget.empty()) {
+                    match = true;
+                } else {
+                    string lowerCur = toLower(currentCustomer);
+                    if (lowerCur == lowerTarget || 
+                        (!lowerTarget.empty() && lowerCur.find(lowerTarget) != string::npos) ||
+                        (!lowerCur.empty() && lowerTarget.find(lowerCur) != string::npos)) {
+                        match = true;
+                    }
+                }
+
+                if (match) {
+                    filteredHistory += currentBlock;
+                    OrderRecord rec;
+                    rec.orderNum = currentOrderNum;
+                    rec.customer = currentCustomer;
+                    rec.total = currentTotal;
+                    matchedOrders.push_back(rec);
+                }
+
+                currentBlock = "";
+                currentCustomer = "";
+                currentOrderNum = "";
+                currentTotal = 0.0f;
+            }
+        }
+        file.close();
+
+        if (filteredHistory.empty()) {
+            if (!targetCustomer.empty()) {
+                filteredHistory = "No purchase transcripts recorded for customer: " + targetCustomer + "\\nPlace an order from the catalog to generate your first bill & receipt!";
+            } else {
+                filteredHistory = "No history available.";
+            }
+        }
+
         stringstream ss;
-        ss << "{\"history\": \"";
-        for (char c : history) {
+        ss << "{\"status\": \"success\", ";
+        ss << "\"customer\": \"" << targetCustomer << "\", ";
+        ss << "\"count\": " << matchedOrders.size() << ", ";
+        ss << "\"history\": \"";
+        for (char c : filteredHistory) {
             if (c == '\n') ss << "\\n";
             else if (c == '"') ss << "\\\"";
+            else if (c == '\r') continue;
             else ss << c;
         }
-        ss << "\"}";
-        
+        ss << "\", \"orders\": [";
+        for (size_t i = 0; i < matchedOrders.size(); ++i) {
+            ss << "{\"orderNum\": \"" << matchedOrders[i].orderNum << "\", "
+               << "\"customer\": \"" << matchedOrders[i].customer << "\", "
+               << "\"total\": " << matchedOrders[i].total << "}";
+            if (i + 1 < matchedOrders.size()) ss << ", ";
+        }
+        ss << "]}";
+
         res.set_content(ss.str(), "application/json");
     });
 
