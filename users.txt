@@ -4,3 +4,5 @@ osama|osama|osama@example.com|user123|customer
 Administrator|admin|admin@novacart.com|admin123|admin
 Ayesha Khan|ayesha|ayesha@example.com|secret123|customer
 Hamza Tariq|hamza|hamza@novacart.pk|pass123|customer
+Sohaib|muhammadsulemanshakeel18@gmail.com|muhammadsulemanshakeel18@gmail.com|sohaib123|customer
+adil|info@themaintenancework.com|info@themaintenancework.com|sohaib123|customer
