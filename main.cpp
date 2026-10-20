@@ -2,6 +2,9 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <map>
+#include <iomanip>
 #include "httplib.h"
 
 using namespace std;
@@ -50,6 +53,12 @@ public:
             return true;
         }
         return false;
+    }
+
+    void restock(int qty) {
+        if (qty > 0) {
+            stock += qty;
+        }
     }
 
     // Virtual Function (Runtime Polymorphism)
@@ -243,6 +252,25 @@ public:
         return amount - (amount * (discountPercent / 100.0));
     }
 
+    bool restockProduct(int id, int qty) {
+        Product* p = searchProduct(id);
+        if (p != NULL && qty > 0) {
+            p->restock(qty);
+            return true;
+        }
+        return false;
+    }
+
+    int getTotalStock() {
+        int total = 0;
+        for (int i = 0; i < 6; i++) {
+            if (inventory[i] != NULL) {
+                total += inventory[i]->getStock();
+            }
+        }
+        return total;
+    }
+
     // Friend function declaration
     friend void printReceipt(Customer &c, ShoppingMall &mall);
 };
@@ -313,6 +341,57 @@ void showHistory() {
     file.close();
 }
 
+// Struct for order records
+struct OrderRecord {
+    string orderNum;
+    string customer;
+    float total;
+};
+
+// Helper to parse receipts.txt
+vector<OrderRecord> parseReceipts() {
+    vector<OrderRecord> orders;
+    ifstream file("receipts.txt");
+    if (!file.is_open()) return orders;
+
+    string line;
+    OrderRecord cur;
+    bool hasOrder = false;
+
+    while (getline(file, line)) {
+        if (line.find("Order #") == 0) {
+            size_t hashPos = line.find("#");
+            size_t barPos = line.find("|");
+            size_t namePos = line.find("Name: ");
+            if (hashPos != string::npos && barPos != string::npos) {
+                cur.orderNum = line.substr(hashPos + 1, barPos - (hashPos + 1));
+                while (!cur.orderNum.empty() && (cur.orderNum.back() == ' ' || cur.orderNum.back() == '\t')) cur.orderNum.pop_back();
+            }
+            if (namePos != string::npos) {
+                cur.customer = line.substr(namePos + 6);
+                while (!cur.customer.empty() && (cur.customer.back() == ' ' || cur.customer.back() == '\r')) cur.customer.pop_back();
+            }
+            hasOrder = true;
+        } else if (line.find("Final Total: Rs. ") == 0) {
+            string totalStr = line.substr(17);
+            try {
+                cur.total = stof(totalStr);
+            } catch (...) {
+                cur.total = 0.0f;
+            }
+        } else if (line.find("---") != string::npos && hasOrder) {
+            orders.push_back(cur);
+            cur = OrderRecord();
+            hasOrder = false;
+        }
+    }
+    if (hasOrder) {
+        orders.push_back(cur);
+    }
+    file.close();
+    return orders;
+}
+
 // ==========================================
 // 7. MAIN FUNCTION
 // ==========================================
@@ -322,6 +401,36 @@ int main() {
 
     // Serve static files (HTML, CSS, JS) from the current directory
     svr.set_mount_point("/", "./");
+
+    // ==========================================
+    // MIDDLEWARE LAYER (Logging, Security & Auth)
+    // ==========================================
+    svr.set_pre_routing_handler([&](const httplib::Request& req, httplib::Response& res) {
+        // 1. Logger Middleware
+        cout << "[MIDDLEWARE LOG] " << req.method << " " << req.path << " from " << req.remote_addr << endl;
+
+        // 2. CORS & Security Headers Middleware
+        res.set_header("Access-Control-Allow-Origin", "*");
+        res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Admin-Key");
+        res.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+
+        if (req.method == "OPTIONS") {
+            res.status = 200;
+            return httplib::Server::HandlerResponse::Handled;
+        }
+
+        // 3. Admin Authentication Middleware for /api/admin/* (except login)
+        if (req.path.find("/api/admin/") == 0 && req.path != "/api/admin/login") {
+            string adminKey = req.get_header_value("X-Admin-Key");
+            if (adminKey != "novacart-admin-key-2026") {
+                res.status = 401;
+                res.set_content("{\"status\": \"error\", \"message\": \"401 Unauthorized: Admin middleware key required\"}", "application/json");
+                return httplib::Server::HandlerResponse::Handled;
+            }
+        }
+
+        return httplib::Server::HandlerResponse::Unhandled;
+    });
 
     // API to get products
     svr.Get("/api/products", [&](const httplib::Request& req, httplib::Response& res) {
@@ -351,7 +460,6 @@ int main() {
         Product* item = myStore.searchProduct(pId);
         if (item != NULL) {
             if (item->checkAndDeduct(qty)) {
-                // Record the purchase using existing function
                 Customer currentCustomer(customerName);
                 currentCustomer.addItem(pId, qty);
                 printReceipt(currentCustomer, myStore);
@@ -365,7 +473,7 @@ int main() {
         }
     });
 
-    // API to get history (just returns a simple string for now, could be enhanced to JSON)
+    // API to get history
     svr.Get("/api/history", [&](const httplib::Request& req, httplib::Response& res) {
         ifstream file("receipts.txt");
         string history = "No history available.";
@@ -386,6 +494,105 @@ int main() {
         ss << "\"}";
         
         res.set_content(ss.str(), "application/json");
+    });
+
+    // ==========================================
+    // ADMIN API ENDPOINTS (Protected by Middleware)
+    // ==========================================
+    
+    // Admin login
+    svr.Post("/api/admin/login", [&](const httplib::Request& req, httplib::Response& res) {
+        string body = req.body;
+        string pass = "";
+        size_t pos = body.find("\"password\":\"");
+        if (pos != string::npos) {
+            size_t start = pos + 12;
+            size_t end = body.find("\"", start);
+            if (end != string::npos) pass = body.substr(start, end - start);
+        }
+
+        if (pass == "admin123" || pass == "admin") {
+            res.set_content("{\"status\": \"success\", \"token\": \"novacart-admin-key-2026\", \"role\": \"SuperAdmin\"}", "application/json");
+        } else {
+            res.status = 401;
+            res.set_content("{\"status\": \"error\", \"message\": \"Invalid admin password! Try 'admin123'\"}", "application/json");
+        }
+    });
+
+    // Admin get orders list
+    svr.Get("/api/admin/orders", [&](const httplib::Request& req, httplib::Response& res) {
+        vector<OrderRecord> orders = parseReceipts();
+        stringstream ss;
+        ss << "[";
+        for (size_t i = 0; i < orders.size(); i++) {
+            ss << "{\"orderNum\":\"" << orders[i].orderNum 
+               << "\",\"customer\":\"" << orders[i].customer 
+               << "\",\"total\":" << fixed << setprecision(2) << orders[i].total << "}";
+            if (i + 1 < orders.size()) ss << ",";
+        }
+        ss << "]";
+        res.set_content(ss.str(), "application/json");
+    });
+
+    // Admin get users / customers aggregation
+    svr.Get("/api/admin/users", [&](const httplib::Request& req, httplib::Response& res) {
+        vector<OrderRecord> orders = parseReceipts();
+        map<string, pair<int, float>> userStats;
+        for (const auto& ord : orders) {
+            if (ord.customer.empty()) continue;
+            userStats[ord.customer].first += 1;
+            userStats[ord.customer].second += ord.total;
+        }
+
+        stringstream ss;
+        ss << "[";
+        size_t idx = 0;
+        for (const auto& pair : userStats) {
+            ss << "{\"name\":\"" << pair.first 
+               << "\",\"orderCount\":" << pair.second.first 
+               << ",\"totalSpent\":" << fixed << setprecision(2) << pair.second.second << "}";
+            if (++idx < userStats.size()) ss << ",";
+        }
+        ss << "]";
+        res.set_content(ss.str(), "application/json");
+    });
+
+    // Admin get analytics summary
+    svr.Get("/api/admin/analytics", [&](const httplib::Request& req, httplib::Response& res) {
+        vector<OrderRecord> orders = parseReceipts();
+        map<string, int> users;
+        float grossRevenue = 0.0f;
+        for (const auto& ord : orders) {
+            grossRevenue += ord.total;
+            if (!ord.customer.empty()) users[ord.customer]++;
+        }
+
+        stringstream ss;
+        ss << "{\"totalOrders\":" << orders.size() 
+           << ",\"grossRevenue\":" << fixed << setprecision(2) << grossRevenue 
+           << ",\"totalCustomers\":" << users.size() 
+           << ",\"totalStock\":" << myStore.getTotalStock() << "}";
+        res.set_content(ss.str(), "application/json");
+    });
+
+    // Admin restock product
+    svr.Post("/api/admin/stock", [&](const httplib::Request& req, httplib::Response& res) {
+        string body = req.body;
+        int pId = -1;
+        int qty = 0;
+        
+        size_t pidPos = body.find("\"pId\":");
+        if (pidPos != string::npos) pId = stoi(body.substr(pidPos + 6));
+        
+        size_t qtyPos = body.find("\"qty\":");
+        if (qtyPos != string::npos) qty = stoi(body.substr(qtyPos + 6));
+
+        if (myStore.restockProduct(pId, qty)) {
+            res.set_content("{\"status\": \"success\", \"message\": \"Stock updated successfully!\"}", "application/json");
+        } else {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Failed to restock. Invalid Product ID or quantity.\"}", "application/json");
+        }
     });
 
     cout << "Starting server on http://localhost:8080..." << endl;

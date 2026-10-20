@@ -37,3 +37,9 @@ Final Total: Rs. 42750
 Order #8 | Name: osama
 Final Total: Rs. 228000
 --------------------------------------
+Order #1 | Name: Ahmed Khan
+Final Total: Rs. 12350
+--------------------------------------
+Order #2 | Name: Ahmed Khan
+Final Total: Rs. 3990
+--------------------------------------
