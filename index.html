@@ -1238,14 +1238,483 @@
             .top-navbar { padding-inline: 16px; }
             .content-area { padding: 16px; }
         }
+
+        /* =========================================
+           AUTHENTICATION PORTAL (ENTRY LOGIN PAGE)
+           ========================================= */
+        .auth-viewport {
+            min-height: 100vh;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 15%, #eff6ff 0%, #f8fafc 70%);
+            padding: 24px;
+            position: relative;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 460px;
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.07), 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+            padding: 38px 32px;
+            animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-brand-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .auth-logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: 800;
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.28);
+        }
+
+        .auth-brand-text h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+
+        .auth-tagline {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13.5px;
+            margin-bottom: 22px;
+        }
+
+        .auth-role-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 14px;
+            padding: 5px;
+            gap: 5px;
+            margin-bottom: 24px;
+        }
+
+        .auth-role-tab {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .auth-role-tab.active {
+            background: #ffffff;
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+        }
+
+        .auth-role-tab:hover:not(.active) {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .auth-label {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .auth-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 12px 14px;
+            padding-inline-end: 42px;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            background: #ffffff;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .auth-pw-toggle {
+            position: absolute;
+            inset-inline-end: 12px;
+            background: none;
+            border: none;
+            color: var(--text-subtle);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s;
+        }
+
+        .auth-pw-toggle:hover {
+            color: var(--text-main);
+        }
+
+        .auth-btn-submit {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.22);
+            transition: all 0.2s;
+            margin-top: 4px;
+        }
+
+        .auth-btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .auth-btn-submit.admin-variant {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.22);
+        }
+
+        .auth-btn-submit.admin-variant:hover {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+
+        .auth-footer-link {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .auth-link-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 12.5px;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: color 0.15s;
+        }
+
+        .auth-link-btn:hover {
+            color: var(--primary-hover);
+        }
+
+        .auth-quick-section {
+            margin-top: 22px;
+            padding-top: 18px;
+            border-top: 1px dashed var(--border-subtle);
+        }
+
+        .auth-quick-title {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: var(--text-subtle);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .auth-quick-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .auth-quick-chip {
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .auth-quick-chip:hover {
+            background: #eff6ff;
+            border-color: var(--primary-border);
+            color: var(--primary);
+        }
+
+        /* Topbar User Session Tag */
+        .user-nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 12px 4px 5px;
+            background: #f8fafc;
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+        }
+
+        .user-nav-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #2563eb;
+            color: white;
+            font-weight: 800;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logout-pill-btn {
+            background: #fef2f2;
+            color: #ef4444;
+            border: 1px solid #fecaca;
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+        }
+
+        .logout-pill-btn:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        #appShell {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+        }
     </style>
 </head>
 <body>
 
     <!-- =========================================
-         1. LIGHT LEFT SIDEBAR MENU
+         VIEW 0: AUTHENTICATION / LOGIN PORTAL
+         (Dedicated Login Page for Customer & Admin)
          ========================================= -->
-    <aside class="sidebar" id="sidebar">
+    <div id="authPortalView" class="auth-viewport">
+        <div class="auth-card">
+            <!-- Brand Badge -->
+            <div class="auth-brand-badge">
+                <div class="auth-logo">N</div>
+                <div class="auth-brand-text">
+                    <h1>NovaCart</h1>
+                </div>
+            </div>
+            <p class="auth-tagline">Sign in to access your shopping cart or admin portal</p>
+
+            <!-- Role Selector Tabs -->
+            <div class="auth-role-tabs">
+                <button type="button" class="auth-role-tab active" id="tabCustomerBtn" onclick="switchAuthRole('customer')">
+                    <svg style="inline-size: 16px; block-size: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span id="tabCustomerLabel">Customer Sign In</span>
+                </button>
+                <button type="button" class="auth-role-tab" id="tabAdminBtn" onclick="switchAuthRole('admin')">
+                    <svg style="inline-size: 16px; block-size: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    <span>Admin Console</span>
+                </button>
+            </div>
+
+            <!-- Customer Login Form -->
+            <form id="customerAuthForm" class="auth-form" onsubmit="handleCustomerLoginSubmit(event)">
+                <div class="auth-form-group">
+                    <label class="auth-label" for="customerUsername">Customer Full Name or Username</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" id="customerUsername" name="username" class="auth-input" autocomplete="username" placeholder="e.g. Ahmed Khan or sohaib" required>
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" for="customerPassword">
+                        <span>Password</span>
+                        <span style="font-weight: 500; color: var(--text-subtle); font-size: 11px;">(Any password / demo: user123)</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <input type="password" id="customerPassword" name="password" class="auth-input" autocomplete="current-password" placeholder="••••••••" required>
+                        <button type="button" class="auth-pw-toggle" onclick="togglePasswordVisibility('customerPassword', this)" aria-label="Toggle password visibility">
+                            <svg style="inline-size: 18px; block-size: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn-submit" id="btnSubmitCustomer">
+                    Enter Shopping Storefront →
+                </button>
+
+                <div class="auth-footer-link">
+                    <span>Don't have an account?</span>
+                    <button type="button" class="auth-link-btn" onclick="showRegisterForm()">Create an Account</button>
+                </div>
+            </form>
+
+            <!-- Customer Register Form -->
+            <form id="customerRegisterForm" class="auth-form" style="display: none;" onsubmit="handleCustomerRegisterSubmit(event)">
+                <div class="auth-form-group">
+                    <label class="auth-label" for="regFullName">Full Name</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" id="regFullName" name="name" class="auth-input" autocomplete="name" placeholder="e.g. Ayesha Khan" required>
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" for="regUsername">Username</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" id="regUsername" name="username" class="auth-input" autocomplete="username" placeholder="e.g. ayesha_khan" required>
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" for="regEmail">Email Address</label>
+                    <div class="auth-input-wrapper">
+                        <input type="email" id="regEmail" name="email" class="auth-input" autocomplete="email" placeholder="e.g. ayesha@example.com" required>
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" for="regPassword">
+                        <span>Create Password</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <input type="password" id="regPassword" name="new-password" class="auth-input" autocomplete="new-password" placeholder="Create a secure password" required minlength="4">
+                        <button type="button" class="auth-pw-toggle" onclick="togglePasswordVisibility('regPassword', this)" aria-label="Toggle password visibility">
+                            <svg style="inline-size: 18px; block-size: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="auth-btn-submit" id="btnSubmitRegister">
+                    Create Account & Enter Storefront →
+                </button>
+
+                <div class="auth-footer-link">
+                    <span>Already have an account?</span>
+                    <button type="button" class="auth-link-btn" onclick="showLoginForm()">Sign In here</button>
+                </div>
+            </form>
+
+            <!-- Admin Login Form -->
+            <form id="adminAuthForm" class="auth-form" style="display: none;" onsubmit="handleAdminLoginSubmit(event)">
+                <div class="auth-form-group">
+                    <label class="auth-label" for="adminUsername">Administrator Username</label>
+                    <div class="auth-input-wrapper">
+                        <input type="text" id="adminUsername" name="username" class="auth-input" autocomplete="username" value="admin" required>
+                    </div>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" for="adminPassword">
+                        <span>Admin Security Password</span>
+                        <span style="font-weight: 500; color: #b45309; font-size: 11px;">Default: admin123</span>
+                    </label>
+                    <div class="auth-input-wrapper">
+                        <input type="password" id="adminPassword" name="password" class="auth-input" autocomplete="current-password" placeholder="admin123" required>
+                        <button type="button" class="auth-pw-toggle" onclick="togglePasswordVisibility('adminPassword', this)" aria-label="Toggle password visibility">
+                            <svg style="inline-size: 18px; block-size: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="font-size: 11.5px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+                    <span>Protected by C++ Pre-Routing Middleware</span>
+                </div>
+
+                <button type="submit" class="auth-btn-submit admin-variant" id="btnSubmitAdmin">
+                    Authorize & Launch Admin Console 🛡️
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================================
+         APPLICATION SHELL (Shown ONLY when logged in)
+         ========================================= -->
+    <div id="appShell" style="display: none; width: 100%;">
+
+        <!-- 1. LIGHT LEFT SIDEBAR MENU -->
+        <aside class="sidebar" id="sidebar">
         <div>
             <!-- Store Brand -->
             <div class="brand-header" onclick="showCustomerView()">
@@ -1299,27 +1768,16 @@
                     <span class="nav-badge" id="sidebarCartCount" style="background: #eff6ff; color: #2563eb;">0</span>
                 </li>
             </ul>
-
-            <div class="nav-section-title">Administration</div>
-            <ul class="nav-list">
-                <li class="nav-item" onclick="handleAdminNavClick()" id="nav-admin">
-                    <div class="nav-item-content">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        <span>Admin Console</span>
-                    </div>
-                    <span class="nav-badge" style="background: #e0e7ff; color: #4338ca;">Portal</span>
-                </li>
-            </ul>
         </div>
 
         <!-- Sidebar Footer -->
         <div class="sidebar-footer">
-            <div class="status-pill">
-                <div class="status-dot"></div>
-                <span>Server & Middleware Live</span>
-            </div>
+            <button onclick="logoutAll()" class="logout-pill-btn" style="width: 100%; justify-content: center; font-weight: 700;">
+                <svg style="inline-size: 14px; block-size: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>Sign Out Account</span>
+            </button>
         </div>
     </aside>
 
@@ -1355,8 +1813,22 @@
                     <span>Checkout</span>
                     <span class="cart-counter" id="topCartCounter">0</span>
                 </button>
-                <button class="filter-btn" onclick="handleAdminNavClick()" style="background: #1e293b; color: white; border: none; padding: 8px 14px; font-weight: 700;">
-                    Admin Panel
+
+                <!-- User Profile Session Badge -->
+                <div class="user-nav-profile" id="topNavProfile">
+                    <div class="user-nav-avatar" id="topNavAvatar">U</div>
+                    <div style="display: flex; flex-direction: column;">
+                        <span id="topNavName" style="font-size: 12.5px; font-weight: 700; color: var(--text-main); line-height: 1.2;">Guest</span>
+                        <span id="topNavRole" style="font-size: 10.5px; color: var(--text-subtle);">Customer</span>
+                    </div>
+                </div>
+
+                <!-- Sign Out Button -->
+                <button class="logout-pill-btn" onclick="logoutAll()" title="Sign out to Login Page">
+                    <svg style="inline-size: 14px; block-size: 14px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
                 </button>
             </div>
         </header>
@@ -1727,28 +2199,7 @@
 
         </main>
     </div>
-
-    <!-- Admin Login Modal -->
-    <div id="adminLoginModal" class="modal-overlay" style="display: none;">
-        <div class="login-box">
-            <div class="login-icon">
-                <svg style="inline-size: 26px; block-size: 26px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <div>
-                <h3>Admin Authorization</h3>
-                <p>Protected by C++ server middleware. Enter your administrator password to proceed.</p>
-            </div>
-            <div>
-                <input type="password" id="adminPasswordInput" class="admin-pass-input" placeholder="Password (admin123)" onkeydown="if(event.key === 'Enter') submitAdminLogin()">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="filter-btn" style="flex: 1;" onclick="closeAdminLoginModal()">Cancel</button>
-                <button class="checkout-btn" style="flex: 1; padding: 10px;" onclick="submitAdminLogin()">Login</button>
-            </div>
-        </div>
-    </div>
+    </div> <!-- End #appShell -->
 
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -1763,7 +2214,8 @@
         let currentCategory = 'all';
         let currentBrand = 'all';
         let currentSearchQuery = '';
-        let adminToken = sessionStorage.getItem("novacart_admin_token") || "";
+        let currentUser = null; // { name, username, role, token }
+        let adminToken = "";
 
         // Product visual illustration icons
         const productIcons = {
@@ -2135,64 +2587,237 @@
         }
 
         /* =========================================
-           ADMIN PANEL LOGIC & MIDDLEWARE INTEGRATION
+           AUTHENTICATION & VIEW ROUTING CONTROLLER
            ========================================= */
-        function handleAdminNavClick() {
-            if (adminToken) {
-                showAdminView();
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            if (input.type === "password") {
+                input.type = "text";
+                btn.innerHTML = `<svg style="inline-size: 18px; block-size: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>`;
             } else {
-                openAdminLoginModal();
+                input.type = "password";
+                btn.innerHTML = `<svg style="inline-size: 18px; block-size: 18px;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>`;
             }
         }
 
-        function openAdminLoginModal() {
-            document.getElementById("adminLoginModal").style.display = "flex";
-            document.getElementById("adminPasswordInput").value = "";
-            document.getElementById("adminPasswordInput").focus();
+        function switchAuthRole(role) {
+            const tabCustomerBtn = document.getElementById("tabCustomerBtn");
+            const tabAdminBtn = document.getElementById("tabAdminBtn");
+            const customerAuthForm = document.getElementById("customerAuthForm");
+            const customerRegisterForm = document.getElementById("customerRegisterForm");
+            const adminAuthForm = document.getElementById("adminAuthForm");
+            const tabCustomerLabel = document.getElementById("tabCustomerLabel");
+
+            if (role === "customer") {
+                tabCustomerBtn.classList.add("active");
+                tabAdminBtn.classList.remove("active");
+                customerAuthForm.style.display = "flex";
+                if (customerRegisterForm) customerRegisterForm.style.display = "none";
+                adminAuthForm.style.display = "none";
+                if (tabCustomerLabel) tabCustomerLabel.textContent = "Customer Sign In";
+            } else {
+                tabAdminBtn.classList.add("active");
+                tabCustomerBtn.classList.remove("active");
+                customerAuthForm.style.display = "none";
+                if (customerRegisterForm) customerRegisterForm.style.display = "none";
+                adminAuthForm.style.display = "flex";
+            }
         }
 
-        function closeAdminLoginModal() {
-            document.getElementById("adminLoginModal").style.display = "none";
+        function showRegisterForm() {
+            const customerAuthForm = document.getElementById("customerAuthForm");
+            const customerRegisterForm = document.getElementById("customerRegisterForm");
+            const adminAuthForm = document.getElementById("adminAuthForm");
+            const tabCustomerBtn = document.getElementById("tabCustomerBtn");
+            const tabAdminBtn = document.getElementById("tabAdminBtn");
+            const tabCustomerLabel = document.getElementById("tabCustomerLabel");
+
+            if (customerAuthForm) customerAuthForm.style.display = "none";
+            if (adminAuthForm) adminAuthForm.style.display = "none";
+            if (customerRegisterForm) customerRegisterForm.style.display = "flex";
+            if (tabCustomerBtn) tabCustomerBtn.classList.add("active");
+            if (tabAdminBtn) tabAdminBtn.classList.remove("active");
+            if (tabCustomerLabel) tabCustomerLabel.textContent = "Create Account";
         }
 
-        async function submitAdminLogin() {
-            const pass = document.getElementById("adminPasswordInput").value.trim();
-            if (!pass) {
-                showToast("Please enter admin password", "error");
+        function showLoginForm() {
+            const customerAuthForm = document.getElementById("customerAuthForm");
+            const customerRegisterForm = document.getElementById("customerRegisterForm");
+            const adminAuthForm = document.getElementById("adminAuthForm");
+            const tabCustomerBtn = document.getElementById("tabCustomerBtn");
+            const tabAdminBtn = document.getElementById("tabAdminBtn");
+            const tabCustomerLabel = document.getElementById("tabCustomerLabel");
+
+            if (customerRegisterForm) customerRegisterForm.style.display = "none";
+            if (adminAuthForm) adminAuthForm.style.display = "none";
+            if (customerAuthForm) customerAuthForm.style.display = "flex";
+            if (tabCustomerBtn) tabCustomerBtn.classList.add("active");
+            if (tabAdminBtn) tabAdminBtn.classList.remove("active");
+            if (tabCustomerLabel) tabCustomerLabel.textContent = "Customer Sign In";
+        }
+
+        async function handleCustomerRegisterSubmit(e) {
+            if (e) e.preventDefault();
+            const name = document.getElementById("regFullName").value.trim();
+            const user = document.getElementById("regUsername").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const pass = document.getElementById("regPassword").value.trim();
+
+            if (!name || !user || !pass) {
+                showToast("Please provide full name, username, and password", "error");
                 return;
             }
 
             try {
-                const response = await fetch('/api/admin/login', {
+                const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: pass })
+                    body: JSON.stringify({ name: name, username: user, email: email, password: pass })
                 });
-
                 const data = await response.json();
-                if (data.status === "success" && data.token) {
-                    adminToken = data.token;
-                    sessionStorage.setItem("novacart_admin_token", adminToken);
-                    closeAdminLoginModal();
-                    showToast("Admin Authenticated via Middleware!", "success");
-                    showAdminView();
+                if (response.ok && data.status === "success") {
+                    currentUser = {
+                        name: data.name || name,
+                        username: data.username || user,
+                        email: email,
+                        role: 'customer',
+                        token: data.token || 'novacart-customer-session'
+                    };
+                    sessionStorage.setItem("novacart_session", JSON.stringify(currentUser));
+                    showToast(`Account created! Welcome to NovaCart, ${currentUser.name}!`, "success");
+                    applyLoginState(currentUser);
                 } else {
-                    showToast(data.message || "Invalid Admin Password", "error");
+                    showToast(data.message || "Registration failed. Please check inputs.", "error");
                 }
-            } catch(e) {
-                console.error("Login error", e);
-                showToast("Failed to authenticate with server", "error");
+            } catch(err) {
+                console.error("Customer register error", err);
+                showToast("Error connecting to server", "error");
             }
         }
 
-        function adminLogout() {
-            adminToken = "";
-            sessionStorage.removeItem("novacart_admin_token");
-            showToast("Logged out of Admin Console", "info");
-            showCustomerView();
+        async function handleCustomerLoginSubmit(e) {
+            if (e) e.preventDefault();
+            const user = document.getElementById("customerUsername").value.trim();
+            const pass = document.getElementById("customerPassword").value.trim();
+
+            if (!user) {
+                showToast("Please enter customer name or username", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: 'customer', username: user, password: pass })
+                });
+                const data = await response.json();
+                if (data.status === "success") {
+                    currentUser = {
+                        name: data.name || user,
+                        username: data.username || user,
+                        role: 'customer',
+                        token: data.token || 'novacart-customer-session'
+                    };
+                    sessionStorage.setItem("novacart_session", JSON.stringify(currentUser));
+                    showToast(`Welcome, ${currentUser.name}! Customer portal unlocked.`, "success");
+                    applyLoginState(currentUser);
+                } else {
+                    showToast(data.message || "Customer login failed", "error");
+                }
+            } catch(err) {
+                console.error("Customer login error", err);
+                showToast("Error connecting to server", "error");
+            }
+        }
+
+        async function handleAdminLoginSubmit(e) {
+            if (e) e.preventDefault();
+            const user = document.getElementById("adminUsername").value.trim();
+            const pass = document.getElementById("adminPassword").value.trim();
+
+            if (!pass) {
+                showToast("Please enter administrator password", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: 'admin', username: user, password: pass })
+                });
+                const data = await response.json();
+                if (data.status === "success") {
+                    currentUser = {
+                        name: "Administrator",
+                        username: user,
+                        role: 'admin',
+                        token: data.token || 'novacart-admin-key-2026'
+                    };
+                    adminToken = currentUser.token;
+                    sessionStorage.setItem("novacart_session", JSON.stringify(currentUser));
+                    sessionStorage.setItem("novacart_admin_token", adminToken);
+                    showToast("Admin credentials verified by C++ middleware!", "success");
+                    applyLoginState(currentUser);
+                } else {
+                    showToast(data.message || "Invalid administrator credentials", "error");
+                }
+            } catch(err) {
+                console.error("Admin login error", err);
+                showToast("Server connection error", "error");
+            }
+        }
+
+        function applyLoginState(user) {
+            if (!user) {
+                showAuthPage();
+                return;
+            }
+
+            // Update topbar badges
+            const topAvatar = document.getElementById("topNavAvatar");
+            const topName = document.getElementById("topNavName");
+            const topRole = document.getElementById("topNavRole");
+
+            if (topAvatar) topAvatar.innerText = (user.name || "U").charAt(0).toUpperCase();
+            if (topName) topName.innerText = user.name || "User";
+            if (topRole) {
+                topRole.innerText = user.role === "admin" ? "🛡️ SuperAdmin" : "Customer";
+                topRole.style.color = user.role === "admin" ? "#2563eb" : "var(--text-subtle)";
+            }
+
+            if (user.role === "admin") {
+                adminToken = user.token || "novacart-admin-key-2026";
+                const profileBadge = document.getElementById("topNavProfile");
+                if (profileBadge) {
+                    profileBadge.style.cursor = "pointer";
+                    profileBadge.title = "Click to open Admin Console";
+                    profileBadge.onclick = showAdminView;
+                }
+                showAdminView();
+            } else {
+                adminToken = "";
+                const profileBadge = document.getElementById("topNavProfile");
+                if (profileBadge) {
+                    profileBadge.style.cursor = "default";
+                    profileBadge.title = "";
+                    profileBadge.onclick = null;
+                }
+                showCustomerView();
+            }
+        }
+
+        function showAuthPage() {
+            document.getElementById("authPortalView").style.display = "flex";
+            document.getElementById("appShell").style.display = "none";
+            showLoginForm();
         }
 
         function showCustomerView() {
+            document.getElementById("authPortalView").style.display = "none";
+            document.getElementById("appShell").style.display = "flex";
             document.getElementById("customerStoreView").style.display = "block";
             document.getElementById("adminPortalView").style.display = "none";
             document.getElementById("topSearchBox").style.display = "flex";
@@ -2200,15 +2825,26 @@
             document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
             document.getElementById("nav-all").classList.add("active");
             document.getElementById("sidebar").classList.remove("open");
+
+            // Pre-fill customer name in checkout
+            if (currentUser && currentUser.name) {
+                const custInput = document.getElementById("customerName");
+                if (custInput) custInput.value = currentUser.name;
+            }
+
+            fetchCatalog();
         }
 
         function showAdminView() {
+            document.getElementById("authPortalView").style.display = "none";
+            document.getElementById("appShell").style.display = "flex";
             document.getElementById("customerStoreView").style.display = "none";
             document.getElementById("adminPortalView").style.display = "flex";
             document.getElementById("topSearchBox").style.display = "none";
             document.getElementById("topCartBtn").style.display = "none";
             document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-            document.getElementById("nav-admin").classList.add("active");
+            const navAdmin = document.getElementById("nav-admin");
+            if (navAdmin) navAdmin.classList.add("active");
             document.getElementById("sidebar").classList.remove("open");
 
             loadAdminAnalytics();
@@ -2216,6 +2852,32 @@
             loadAdminOrders();
             renderAdminStockTable();
             fetchHistory();
+        }
+
+        function handleAdminNavClick() {
+            if (currentUser && currentUser.role === "admin") {
+                showAdminView();
+            } else {
+                if (confirm("Admin Console requires Administrator credentials. Switch to Admin Login?")) {
+                    logoutAll();
+                    switchAuthRole('admin');
+                }
+            }
+        }
+
+        function adminLogout() {
+            logoutAll();
+        }
+
+        function logoutAll() {
+            sessionStorage.removeItem("novacart_session");
+            sessionStorage.removeItem("novacart_admin_token");
+            adminToken = "";
+            currentUser = null;
+            cart = [];
+            renderCart();
+            showToast("Signed out. Please sign in to continue.", "info");
+            showAuthPage();
         }
 
         function switchAdminTab(tabName, btn) {
@@ -2387,9 +3049,18 @@
             }
         }
 
-        // Initialize application
-        fetchCatalog();
-        fetchHistory();
+        // Initialize application - Session Check & View Bootstrapper
+        const savedSession = sessionStorage.getItem("novacart_session");
+        if (savedSession) {
+            try {
+                currentUser = JSON.parse(savedSession);
+                applyLoginState(currentUser);
+            } catch(e) {
+                showAuthPage();
+            }
+        } else {
+            showAuthPage();
+        }
     </script>
 </body>
 </html>

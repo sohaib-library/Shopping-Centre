@@ -393,6 +393,58 @@ vector<OrderRecord> parseReceipts() {
 }
 
 // ==========================================
+// USER ACCOUNTS & PERSISTENCE
+// ==========================================
+struct UserAccount {
+    string name;
+    string username;
+    string email;
+    string password;
+    string role; // "customer" or "admin"
+};
+
+inline vector<UserAccount> loadUsers() {
+    vector<UserAccount> users;
+    ifstream file("users.txt");
+    if (!file.is_open()) {
+        // Create initial default seed users
+        ofstream out("users.txt");
+        out << "Ahmed Khan|ahmed|ahmed@example.com|user123|customer\n";
+        out << "sohaib|sohaib|sohaib@example.com|user123|customer\n";
+        out << "osama|osama|osama@example.com|user123|customer\n";
+        out << "Administrator|admin|admin@novacart.com|admin123|admin\n";
+        out.close();
+        file.open("users.txt");
+    }
+
+    string line;
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+        stringstream ss(line);
+        string name, username, email, pass, role;
+        getline(ss, name, '|');
+        getline(ss, username, '|');
+        getline(ss, email, '|');
+        getline(ss, pass, '|');
+        getline(ss, role, '|');
+        if (!username.empty()) {
+            if (role.empty()) role = "customer";
+            users.push_back({name, username, email, pass, role});
+        }
+    }
+    file.close();
+    return users;
+}
+
+inline bool saveNewUser(const UserAccount& newUser) {
+    ofstream out("users.txt", ios::app);
+    if (!out.is_open()) return false;
+    out << newUser.name << "|" << newUser.username << "|" << newUser.email << "|" << newUser.password << "|" << newUser.role << "\n";
+    out.close();
+    return true;
+}
+
+// ==========================================
 // 7. MAIN FUNCTION
 // ==========================================
 int main() {
@@ -497,6 +549,116 @@ int main() {
     });
 
     // ==========================================
+    // AUTHENTICATION API (Register & Login)
+    // ==========================================
+    
+    // Customer Registration Endpoint
+    svr.Post("/api/auth/register", [&](const httplib::Request& req, httplib::Response& res) {
+        string body = req.body;
+        auto extractStr = [&](const string& key) -> string {
+            string search = "\"" + key + "\"";
+            size_t pos = body.find(search);
+            if (pos == string::npos) return "";
+            size_t colon = body.find(":", pos + search.length());
+            if (colon == string::npos) return "";
+            size_t firstQuote = body.find("\"", colon + 1);
+            if (firstQuote == string::npos) return "";
+            size_t secondQuote = body.find("\"", firstQuote + 1);
+            if (secondQuote == string::npos) return "";
+            return body.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+        };
+
+        string name = extractStr("name");
+        string username = extractStr("username");
+        string email = extractStr("email");
+        string password = extractStr("password");
+
+        if (name.empty()) name = username;
+        if (username.empty() || password.empty()) {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Username and password are required.\"}", "application/json");
+            return;
+        }
+
+        vector<UserAccount> users = loadUsers();
+        for (const auto& u : users) {
+            if (u.username == username) {
+                res.status = 400;
+                res.set_content("{\"status\": \"error\", \"message\": \"Username already taken! Please choose another.\"}", "application/json");
+                return;
+            }
+            if (!email.empty() && u.email == email) {
+                res.status = 400;
+                res.set_content("{\"status\": \"error\", \"message\": \"Email address is already registered!\"}", "application/json");
+                return;
+            }
+        }
+
+        UserAccount newAcc = {name, username, email, password, "customer"};
+        if (saveNewUser(newAcc)) {
+            res.set_content("{\"status\": \"success\", \"role\": \"customer\", \"name\": \"" + name + "\", \"username\": \"" + username + "\", \"token\": \"novacart-customer-session\", \"message\": \"Account registered successfully!\"}", "application/json");
+        } else {
+            res.status = 500;
+            res.set_content("{\"status\": \"error\", \"message\": \"Server error saving user account.\"}", "application/json");
+        }
+    });
+
+    // Customer & Admin Login Endpoint
+    svr.Post("/api/auth/login", [&](const httplib::Request& req, httplib::Response& res) {
+        string body = req.body;
+        string user = "";
+        string pass = "";
+        string role = "customer";
+
+        auto extractStr = [&](const string& key) -> string {
+            string search = "\"" + key + "\"";
+            size_t pos = body.find(search);
+            if (pos == string::npos) return "";
+            size_t colon = body.find(":", pos + search.length());
+            if (colon == string::npos) return "";
+            size_t firstQuote = body.find("\"", colon + 1);
+            if (firstQuote == string::npos) return "";
+            size_t secondQuote = body.find("\"", firstQuote + 1);
+            if (secondQuote == string::npos) return "";
+            return body.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+        };
+
+        string u = extractStr("username");
+        string p = extractStr("password");
+        string r = extractStr("role");
+
+        if (!u.empty()) user = u;
+        if (!p.empty()) pass = p;
+        if (!r.empty()) role = r;
+
+        if (role == "admin" || user == "admin") {
+            if (pass == "admin123" || pass == "admin") {
+                res.set_content("{\"status\": \"success\", \"role\": \"admin\", \"token\": \"novacart-admin-key-2026\", \"name\": \"Administrator\", \"username\": \"admin\"}", "application/json");
+            } else {
+                res.status = 401;
+                res.set_content("{\"status\": \"error\", \"message\": \"Invalid administrator credentials! Password is 'admin123'\"}", "application/json");
+            }
+        } else {
+            // Customer Login: verify against registered users
+            vector<UserAccount> users = loadUsers();
+            string displayName = user;
+            for (const auto& acc : users) {
+                if (acc.username == user || acc.email == user || acc.name == user) {
+                    displayName = acc.name;
+                    if (!acc.password.empty() && !pass.empty() && acc.password != pass) {
+                        res.status = 401;
+                        res.set_content("{\"status\": \"error\", \"message\": \"Incorrect password for user account!\"}", "application/json");
+                        return;
+                    }
+                    break;
+                }
+            }
+            if (displayName.empty()) displayName = "Customer";
+            res.set_content("{\"status\": \"success\", \"role\": \"customer\", \"token\": \"novacart-customer-session\", \"name\": \"" + displayName + "\", \"username\": \"" + user + "\"}", "application/json");
+        }
+    });
+
+    // ==========================================
     // ADMIN API ENDPOINTS (Protected by Middleware)
     // ==========================================
     
@@ -534,10 +696,20 @@ int main() {
         res.set_content(ss.str(), "application/json");
     });
 
-    // Admin get users / customers aggregation
+    // Admin get users / customers aggregation (both registered accounts and order history)
     svr.Get("/api/admin/users", [&](const httplib::Request& req, httplib::Response& res) {
         vector<OrderRecord> orders = parseReceipts();
         map<string, pair<int, float>> userStats;
+        
+        // Seed with registered customers
+        vector<UserAccount> registered = loadUsers();
+        for (const auto& u : registered) {
+            if (u.role != "admin") {
+                userStats[u.name] = {0, 0.0f};
+            }
+        }
+
+        // Aggregate actual orders from receipts.txt
         for (const auto& ord : orders) {
             if (ord.customer.empty()) continue;
             userStats[ord.customer].first += 1;

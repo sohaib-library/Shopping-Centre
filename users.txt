@@ -1,0 +1,6 @@
+Ahmed Khan|ahmed|ahmed@example.com|user123|customer
+sohaib|sohaib|sohaib@example.com|user123|customer
+osama|osama|osama@example.com|user123|customer
+Administrator|admin|admin@novacart.com|admin123|admin
+Ayesha Khan|ayesha|ayesha@example.com|secret123|customer
+Hamza Tariq|hamza|hamza@novacart.pk|pass123|customer
