@@ -1,0 +1,39 @@
+Order #1 | Name: Ahmed Khan
+Final Total: Rs. 8075
+--------------------------------------
+Order #2 | Name: sohaib
+Final Total: Rs. 8075
+--------------------------------------
+Order #3 | Name: sohaib
+Final Total: Rs. 6175
+--------------------------------------
+Order #4 | Name: sohaib
+Final Total: Rs. 42750
+--------------------------------------
+Order #5 | Name: Ahmed Khan
+Final Total: Rs. 1.2825e+06
+--------------------------------------
+Order #1 | Name: Ahmed Khan
+Final Total: Rs. 6175
+--------------------------------------
+Order #2 | Name: Ahmed Khan
+Final Total: Rs. 8075
+--------------------------------------
+Order #3 | Name: Ahmed Khan
+Final Total: Rs. 256500
+--------------------------------------
+Order #4 | Name: Ahmed Khan
+Final Total: Rs. 3990
+--------------------------------------
+Order #5 | Name: osama
+Final Total: Rs. 228000
+--------------------------------------
+Order #6 | Name: osama
+Final Total: Rs. 228000
+--------------------------------------
+Order #7 | Name: osama
+Final Total: Rs. 42750
+--------------------------------------
+Order #8 | Name: osama
+Final Total: Rs. 228000
+--------------------------------------

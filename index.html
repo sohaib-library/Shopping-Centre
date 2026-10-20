@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated Multi-Brand Shopping Platform</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+            padding: 20px;
+        }
+        header {
+            background: #1e293b;
+            color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        header h1 {
+            font-size: 22px;
+        }
+        .stats-badge {
+            background: #0ea5e9;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            color: #0f172a;
+        }
+        /* Product Grid */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 15px;
+        }
+        .product-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: #fafafa;
+        }
+        .product-card .brand {
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #64748b;
+        }
+        .product-card .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .product-card .price {
+            color: #16a34a;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .product-card .tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            margin: 6px 0;
+            background: #e0f2fe;
+            color: #0369a1;
+            font-weight: 600;
+        }
+        .btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
+            transition: 0.2s ease;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .btn-success {
+            background: #16a34a;
+        }
+        .btn-success:hover {
+            background: #15803d;
+        }
+        .btn-danger {
+            background: #dc2626;
+            margin-top: 0;
+            width: auto;
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        /* Cart Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        th {
+            background: #f8fafc;
+            color: #475569;
+        }
+        .bill-summary {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .bill-summary div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .bill-summary .total {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0f172a;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 6px;
+        }
+        .history-box {
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: monospace;
+            padding: 12px;
+            border-radius: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>Integrated Multi-Brand Shopping Platform</h1>
+            <p style="font-size: 12px; color: #94a3b8;">OOP Semester Project Front-End Simulation</p>
+        </div>
+        <div class="stats-badge" id="orderStat">Total Orders Processed: 0</div>
+    </header>
+
+    <div class="container">
+        <!-- Catalog Section -->
+        <div>
+            <div class="card">
+                <h2>Product Catalog (Multi-Brand Inventory)</h2>
+                <div class="catalog-grid" id="productGrid"></div>
+            </div>
+
+            <!-- Persistent Order Logs (File Handling Simulator) -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; margin-bottom: 15px; padding-bottom: 8px;">
+                    <h2 style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">File Stream Log (receipts.txt)</h2>
+                    <button class="btn btn-success" style="width: auto; margin-top: 0; padding: 4px 8px; font-size: 12px;" onclick="downloadLog()">Save File</button>
+                </div>
+                <div class="history-box" id="fileLog">--- File initialized (Empty) ---</div>
+            </div>
+        </div>
+
+        <!-- Cart & Checkout Section -->
+        <div>
+            <div class="card">
+                <h2>Customer Checkout</h2>
+                <label style="font-size: 13px; font-weight: 600;">Customer Name:</label>
+                <input type="text" id="custName" value="Ahmed Khan" style="width: 100%; padding: 8px; margin: 6px 0 15px 0; border: 1px solid #cbd5e1; border-radius: 4px;">
+
+                <h3>Active Cart</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartTableBody">
+                        <tr><td colspan="4" style="text-align: center; color: #94a3b8;">Cart is empty</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="bill-summary">
+                    <div><span>Subtotal:</span> <span id="subTotal">Rs. 0</span></div>
+                    <div><span>Student Promo (5% Off):</span> <span id="discountVal">- Rs. 0</span></div>
+                    <div class="total"><span>Final Payable:</span> <span id="grandTotal">Rs. 0</span></div>
+                </div>
+
+                <button class="btn btn-success" onclick="processCheckout()">Checkout & Save Bill</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let catalog = [];
+        let cart = [];
+        let totalOrders = 0;
+
+        function calcBill(amount, discountPercent = 0) {
+            if (discountPercent === 0) return amount;
+            return amount - (amount * (discountPercent / 100.0));
+        }
+
+        function downloadLog() {
+            const text = document.getElementById("fileLog").innerText;
+            const blob = new Blob([text], { type: "text/plain" });
+            const anchor = document.createElement("a");
+            anchor.download = "receipts.txt";
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+            window.URL.revokeObjectURL(anchor.href);
+        }
+
+        async function fetchCatalog() {
+            try {
+                const response = await fetch('/api/products');
+                catalog = await response.json();
+                renderCatalog();
+            } catch (err) {
+                console.error("Failed to load catalog", err);
+            }
+        }
+
+        async function fetchHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                document.getElementById("fileLog").innerText = data.history;
+            } catch (err) {
+                console.error("Failed to load history", err);
+            }
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById("productGrid");
+            grid.innerHTML = "";
+
+            catalog.forEach(item => {
+                let details = "Base Product";
+                if (item.type === "electronics") details = `Warranty: ${item.warrantyYear} Year(s)`;
+                if (item.type === "clothing") details = `Size: ${item.size}`;
+
+                grid.innerHTML += `
+                    <div class="product-card">
+                        <div>
+                            <span class="brand">${item.brand}</span>
+                            <div class="title">${item.title}</div>
+                            <span class="tag">${details}</span>
+                            <div class="price">Rs. ${item.price.toLocaleString()}</div>
+                            <div style="font-size: 12px; color: #64748b;">In Stock: ${item.stock}</div>
+                        </div>
+                        <button class="btn" onclick="addToCart(${item.id})">Add to Cart</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(productId) {
+            const prod = catalog.find(p => p.id === productId);
+            if (!prod || prod.stock <= 0) {
+                alert("Out of stock!");
+                return;
+            }
+
+            const cartItem = cart.find(c => c.product.id === productId);
+            if (cartItem) {
+                if (cartItem.qty < prod.stock) {
+                    cartItem.qty++;
+                } else {
+                    alert("Cannot add more than available stock!");
+                    return;
+                }
+            } else {
+                cart.push({ product: prod, qty: 1 });
+            }
+            renderCart();
+        }
+
+        function removeFromCart(productId) {
+            cart = cart.filter(c => c.product.id !== productId);
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById("cartTableBody");
+            tbody.innerHTML = "";
+
+            if (cart.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8;">Cart is empty</td></tr>`;
+                document.getElementById("subTotal").innerText = `Rs. 0`;
+                document.getElementById("discountVal").innerText = `- Rs. 0`;
+                document.getElementById("grandTotal").innerText = `Rs. 0`;
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                const itemTotal = item.product.price * item.qty;
+                subtotal += itemTotal;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${item.product.title}</strong></td>
+                        <td>${item.qty}</td>
+                        <td>${itemTotal.toLocaleString()}</td>
+                        <td><button class="btn btn-danger" onclick="removeFromCart(${item.product.id})">x</button></td>
+                    </tr>
+                `;
+            });
+
+            const finalBill = calcBill(subtotal, 5); // 5% discount
+            const discountAmt = subtotal - finalBill;
+
+            document.getElementById("subTotal").innerText = `Rs. ${subtotal.toLocaleString()}`;
+            document.getElementById("discountVal").innerText = `- Rs. ${discountAmt.toLocaleString()}`;
+            document.getElementById("grandTotal").innerText = `Rs. ${finalBill.toLocaleString()}`;
+        }
+
+        async function processCheckout() {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+
+            const name = document.getElementById("custName").value.trim() || "Guest Customer";
+            
+            // Process each item in cart via API
+            for (let item of cart) {
+                try {
+                    const response = await fetch('/api/buy', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ pId: item.product.id, qty: item.qty, customer: name })
+                    });
+                    const resJson = await response.json();
+                    if(resJson.status !== "success") {
+                        alert("Error purchasing " + item.product.title + ": " + resJson.message);
+                    }
+                } catch(e) {
+                    console.error("Error during checkout:", e);
+                }
+            }
+
+            totalOrders++;
+            document.getElementById("orderStat").innerText = `Total Orders Processed: ${totalOrders}`;
+            alert("Checkout completed!");
+
+            cart = [];
+            renderCart();
+            fetchCatalog(); // Refresh catalog to update stock
+            fetchHistory(); // Refresh history
+        }
+
+        // Initialize UI
+        fetchCatalog();
+        fetchHistory();
+    </script>
+</body>
+</html>
