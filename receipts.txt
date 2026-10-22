@@ -67,3 +67,27 @@ Final Total: Rs. 42750
 Order #2 | Name: Guest
 Final Total: Rs. 6175
 --------------------------------------
+Order #5 | Name: sohaib
+Final Total: Rs. 14250
+--------------------------------------
+Order #6 | Name: sohaib
+Final Total: Rs. 9500
+--------------------------------------
+Order #7 | Name: sohaib
+Final Total: Rs. 23750
+--------------------------------------
+Order #8 | Name: sohaib
+Final Total: Rs. 18050
+--------------------------------------
+Order #9 | Name: sohaib
+Final Total: Rs. 33250
+--------------------------------------
+Order #10 | Name: sohaib
+Final Total: Rs. 11400
+--------------------------------------
+Order #1 | Name: osama
+Final Total: Rs. 256500
+--------------------------------------
+Order #2 | Name: osama
+Final Total: Rs. 6175
+--------------------------------------

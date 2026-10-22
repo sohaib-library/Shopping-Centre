@@ -9,6 +9,34 @@
 
 using namespace std;
 
+inline string jsonEscape(const string& input) {
+    string out;
+    out.reserve(input.size() + 8);
+    for (unsigned char c : input) {
+        switch (c) {
+            case '"': out += "\\\""; break;
+            case '\\': out += "\\\\"; break;
+            case '\n': out += "\\n"; break;
+            case '\r': break;
+            case '\t': out += "\\t"; break;
+            default:
+                if (c >= 0x20) out += static_cast<char>(c);
+                break;
+        }
+    }
+    return out;
+}
+
+inline string fileField(const string& input) {
+    string out;
+    out.reserve(input.size());
+    for (char c : input) {
+        if (c == '|' || c == '\n' || c == '\r') out += ' ';
+        else out += c;
+    }
+    return out;
+}
+
 // Forward declaration friend function ke liye
 class ShoppingMall;
 class Customer;
@@ -23,29 +51,39 @@ protected:
     string brand;
     float price;
     int stock;
+    string category;
 
 public:
     Product() {
         id = 0;
         title = "";
         brand = "";
-        price = 0.0;
+        price = 0.0f;
         stock = 0;
+        category = "general";
     }
 
-    Product(int i, string t, string b, float p, int s) {
+    Product(int i, string t, string b, float p, int s, string c = "general") {
         id = i;
         title = t;
         brand = b;
         price = p;
         stock = s;
+        category = c;
     }
 
-    int getId() { return id; }
-    string getTitle() { return title; }
-    string getBrand() { return brand; }
-    float getPrice() { return price; }
-    int getStock() { return stock; }
+    int getId() const { return id; }
+    string getTitle() const { return title; }
+    string getBrand() const { return brand; }
+    float getPrice() const { return price; }
+    int getStock() const { return stock; }
+    string getCategory() const { return category; }
+
+    void setTitle(const string& t) { title = t; }
+    void setBrand(const string& b) { brand = b; }
+    void setPrice(float p) { price = p; }
+    void setStock(int s) { stock = s; }
+    void setCategory(const string& c) { category = c; }
 
     bool checkAndDeduct(int qty) {
         if (stock >= qty) {
@@ -61,6 +99,10 @@ public:
         }
     }
 
+    virtual string getExtra() const { return ""; }
+    virtual void setExtra(const string& val) {}
+    virtual string getType() const { return category; }
+
     // Virtual Function (Runtime Polymorphism)
     virtual void showInfo() {
         cout << id << "\t" << title << "\t" << brand << "\tRs. " << price << "\tQty: " << stock;
@@ -69,11 +111,12 @@ public:
     virtual string toJson() {
         stringstream ss;
         ss << "{\"id\": " << id 
-           << ", \"title\": \"" << title 
-           << "\", \"brand\": \"" << brand 
+           << ", \"title\": \"" << jsonEscape(title) 
+           << "\", \"brand\": \"" << jsonEscape(brand) 
            << "\", \"price\": " << price 
            << ", \"stock\": " << stock 
-           << ", \"type\": \"product\"}";
+           << ", \"extra\": \"" << jsonEscape(getExtra()) << "\""
+           << ", \"type\": \"" << jsonEscape(getType()) << "\"}";
         return ss.str();
     }
 
@@ -89,12 +132,16 @@ private:
 
 public:
     Electronics(int i, string t, string b, float p, int s, int w)
-        : Product(i, t, b, p, s) {
-        warrantyYear = w;
+        : Product(i, t, b, p, s, "electronics"), warrantyYear(w) {}
+
+    string getExtra() const override { return to_string(warrantyYear); }
+    void setExtra(const string& val) override {
+        try { warrantyYear = stoi(val); } catch (...) { warrantyYear = 1; }
     }
+    string getType() const override { return "electronics"; }
 
     // Function overriding
-    void showInfo() {
+    void showInfo() override {
         Product::showInfo();
         cout << "\t[Warranty: " << warrantyYear << " Year]" << endl;
     }
@@ -102,11 +149,12 @@ public:
     string toJson() override {
         stringstream ss;
         ss << "{\"id\": " << id 
-           << ", \"title\": \"" << title 
-           << "\", \"brand\": \"" << brand 
+           << ", \"title\": \"" << jsonEscape(title) 
+           << "\", \"brand\": \"" << jsonEscape(brand) 
            << "\", \"price\": " << price 
            << ", \"stock\": " << stock 
            << ", \"warrantyYear\": " << warrantyYear 
+           << ", \"extra\": \"" << jsonEscape(to_string(warrantyYear) + " Yr Warranty") << "\""
            << ", \"type\": \"electronics\"}";
         return ss.str();
     }
@@ -121,12 +169,14 @@ private:
 
 public:
     Clothing(int i, string t, string b, float p, int s, string sz)
-        : Product(i, t, b, p, s) {
-        size = sz;
-    }
+        : Product(i, t, b, p, s, "clothing"), size(sz) {}
+
+    string getExtra() const override { return size; }
+    void setExtra(const string& val) override { size = val; }
+    string getType() const override { return "clothing"; }
 
     // Function overriding
-    void showInfo() {
+    void showInfo() override {
         Product::showInfo();
         cout << "\t[Size: " << size << "]" << endl;
     }
@@ -134,12 +184,46 @@ public:
     string toJson() override {
         stringstream ss;
         ss << "{\"id\": " << id 
-           << ", \"title\": \"" << title 
-           << "\", \"brand\": \"" << brand 
+           << ", \"title\": \"" << jsonEscape(title) 
+           << "\", \"brand\": \"" << jsonEscape(brand) 
            << "\", \"price\": " << price 
            << ", \"stock\": " << stock 
-           << ", \"size\": \"" << size 
-           << "\", \"type\": \"clothing\"}";
+           << ", \"size\": \"" << jsonEscape(size) 
+           << "\", \"extra\": \"" << jsonEscape("Size: " + size) << "\""
+           << ", \"type\": \"clothing\"}";
+        return ss.str();
+    }
+};
+
+// ==========================================
+// 3B. INHERITANCE: General / Custom Category Product
+// ==========================================
+class GeneralProduct : public Product {
+private:
+    string extraSpec;
+
+public:
+    GeneralProduct(int i, string t, string b, float p, int s, string cat, string spec)
+        : Product(i, t, b, p, s, cat), extraSpec(spec) {}
+
+    string getExtra() const override { return extraSpec; }
+    void setExtra(const string& val) override { extraSpec = val; }
+    string getType() const override { return category; }
+
+    void showInfo() override {
+        Product::showInfo();
+        cout << "\t[" << category << ": " << extraSpec << "]" << endl;
+    }
+
+    string toJson() override {
+        stringstream ss;
+        ss << "{\"id\": " << id 
+           << ", \"title\": \"" << jsonEscape(title) 
+           << "\", \"brand\": \"" << jsonEscape(brand) 
+           << "\", \"price\": " << price 
+           << ", \"stock\": " << stock 
+           << ", \"extra\": \"" << jsonEscape(extraSpec) << "\""
+           << ", \"type\": \"" << jsonEscape(category) << "\"}";
         return ss.str();
     }
 };
@@ -179,28 +263,39 @@ public:
 };
 
 // ==========================================
+// 4B. CATEGORY MODEL
+// ==========================================
+struct CategoryInfo {
+    string key;
+    string label;
+};
+
+// ==========================================
 // 5. MAIN PLATFORM / SHOPPING MALL
 // ==========================================
 class ShoppingMall {
 private:
-    Product* inventory[6];
+    vector<Product*> inventory;
+    vector<CategoryInfo> categories;
+    int nextProductId;
     static int orderCounter; // Static data member
 
 public:
     ShoppingMall() {
-        // Pre-loaded items
-        inventory[0] = new Electronics(1, "iPhone 15", "Apple", 270000, 5, 1);
-        inventory[1] = new Electronics(2, "S23 Ultra", "Samsung", 240000, 4, 2);
-        inventory[2] = new Electronics(3, "Headphones", "Sony", 45000, 8, 1);
-        inventory[3] = new Clothing(4, "Hoodie", "Nike", 6500, 15, "L");
-        inventory[4] = new Clothing(5, "Tracksuit", "Adidas", 8500, 10, "M");
-        inventory[5] = new Clothing(6, "Formal Shirt", "Outfitters", 4200, 12, "XL");
+        nextProductId = 1;
+        loadCategories();
+        loadProducts();
     }
 
     ~ShoppingMall() {
-        for (int i = 0; i < 6; i++) {
-            delete inventory[i];
+        clearInventory();
+    }
+
+    void clearInventory() {
+        for (Product* p : inventory) {
+            delete p;
         }
+        inventory.clear();
     }
 
     // Static function
@@ -212,32 +307,243 @@ public:
         orderCounter++;
     }
 
+    // ------------------------------------------
+    // Category Management & Persistence
+    // ------------------------------------------
+    void loadCategories() {
+        categories.clear();
+        ifstream file("categories.txt");
+        if (!file.is_open()) {
+            categories.push_back({"electronics", "Electronics"});
+            categories.push_back({"clothing", "Fashion & Apparel"});
+            saveCategories();
+            return;
+        }
+
+        string line;
+        while (getline(file, line)) {
+            while (!line.empty() && (line.back() == '\r' || line.back() == '\n' || line.back() == ' ')) line.pop_back();
+            if (line.empty()) continue;
+            stringstream ss(line);
+            string k, l;
+            getline(ss, k, '|');
+            getline(ss, l, '|');
+            if (!k.empty()) {
+                if (l.empty()) l = k;
+                categories.push_back({k, l});
+            }
+        }
+        file.close();
+        if (categories.empty()) {
+            categories.push_back({"electronics", "Electronics"});
+            categories.push_back({"clothing", "Fashion & Apparel"});
+            saveCategories();
+        }
+    }
+
+    void saveCategories() {
+        ofstream out("categories.txt");
+        for (const auto& cat : categories) {
+            out << cat.key << "|" << cat.label << "\n";
+        }
+        out.close();
+    }
+
+    bool addCategory(const string& key, const string& label) {
+        if (key.empty()) return false;
+        for (const auto& cat : categories) {
+            if (cat.key == key) return false;
+        }
+        categories.push_back({key, label.empty() ? key : label});
+        saveCategories();
+        return true;
+    }
+
+    string getCategoriesJson() {
+        stringstream ss;
+        ss << "[";
+        for (size_t i = 0; i < categories.size(); ++i) {
+            ss << "{\"key\":\"" << jsonEscape(categories[i].key) << "\",\"label\":\"" << jsonEscape(categories[i].label) << "\"}";
+            if (i + 1 < categories.size()) ss << ",";
+        }
+        ss << "]";
+        return ss.str();
+    }
+
+    // ------------------------------------------
+    // Product Persistence & CRUD Operations
+    // ------------------------------------------
+    void loadProducts() {
+        clearInventory();
+        ifstream file("products.txt");
+        if (!file.is_open()) {
+            // Seed initial default products
+            inventory.push_back(new Electronics(1, "iPhone 15", "Apple", 270000, 5, 1));
+            inventory.push_back(new Electronics(2, "S23 Ultra", "Samsung", 240000, 4, 2));
+            inventory.push_back(new Electronics(3, "Headphones", "Sony", 45000, 8, 1));
+            inventory.push_back(new Clothing(4, "Hoodie", "Nike", 6500, 15, "L"));
+            inventory.push_back(new Clothing(5, "Tracksuit", "Adidas", 8500, 10, "M"));
+            inventory.push_back(new Clothing(6, "Formal Shirt", "Outfitters", 4200, 12, "XL"));
+            nextProductId = 7;
+            saveProducts();
+            return;
+        }
+
+        string line;
+        int maxId = 0;
+        while (getline(file, line)) {
+            while (!line.empty() && (line.back() == '\r' || line.back() == '\n')) line.pop_back();
+            if (line.empty()) continue;
+
+            stringstream ss(line);
+            string idStr, title, brand, priceStr, stockStr, cat, extra;
+            getline(ss, idStr, '|');
+            getline(ss, title, '|');
+            getline(ss, brand, '|');
+            getline(ss, priceStr, '|');
+            getline(ss, stockStr, '|');
+            getline(ss, cat, '|');
+            getline(ss, extra, '|');
+
+            if (idStr.empty() || title.empty()) continue;
+
+            int id = 0;
+            float price = 0.0f;
+            int stock = 0;
+            try { id = stoi(idStr); } catch (...) { continue; }
+            try { price = stof(priceStr); } catch (...) { price = 0.0f; }
+            try { stock = stoi(stockStr); } catch (...) { stock = 0; }
+
+            if (id > maxId) maxId = id;
+
+            if (cat == "electronics") {
+                int w = 1;
+                try { w = stoi(extra); } catch (...) { w = 1; }
+                inventory.push_back(new Electronics(id, title, brand, price, stock, w));
+            } else if (cat == "clothing") {
+                if (extra.empty()) extra = "M";
+                inventory.push_back(new Clothing(id, title, brand, price, stock, extra));
+            } else {
+                inventory.push_back(new GeneralProduct(id, title, brand, price, stock, cat, extra));
+            }
+        }
+        file.close();
+
+        if (inventory.empty()) {
+            inventory.push_back(new Electronics(1, "iPhone 15", "Apple", 270000, 5, 1));
+            inventory.push_back(new Electronics(2, "S23 Ultra", "Samsung", 240000, 4, 2));
+            inventory.push_back(new Electronics(3, "Headphones", "Sony", 45000, 8, 1));
+            inventory.push_back(new Clothing(4, "Hoodie", "Nike", 6500, 15, "L"));
+            inventory.push_back(new Clothing(5, "Tracksuit", "Adidas", 8500, 10, "M"));
+            inventory.push_back(new Clothing(6, "Formal Shirt", "Outfitters", 4200, 12, "XL"));
+            maxId = 6;
+            saveProducts();
+        }
+        nextProductId = maxId + 1;
+    }
+
+    void saveProducts() {
+        ofstream out("products.txt");
+        for (Product* p : inventory) {
+            if (p != nullptr) {
+                out << p->getId() << "|" 
+                    << fileField(p->getTitle()) << "|" 
+                    << fileField(p->getBrand()) << "|" 
+                    << p->getPrice() << "|" 
+                    << p->getStock() << "|" 
+                    << fileField(p->getType()) << "|" 
+                    << fileField(p->getExtra()) << "\n";
+            }
+        }
+        out.close();
+    }
+
+    Product* searchProduct(int id) {
+        for (Product* p : inventory) {
+            if (p != nullptr && p->getId() == id) {
+                return p;
+            }
+        }
+        return nullptr;
+    }
+
+    Product* addProduct(const string& title, const string& brand, float price, int stock, const string& category, const string& extra) {
+        int id = nextProductId++;
+        Product* newProd = nullptr;
+        if (category == "electronics") {
+            int w = 1;
+            try { w = stoi(extra); } catch (...) { w = 1; }
+            newProd = new Electronics(id, title, brand, price, stock, w);
+        } else if (category == "clothing") {
+            newProd = new Clothing(id, title, brand, price, stock, extra.empty() ? "M" : extra);
+        } else {
+            newProd = new GeneralProduct(id, title, brand, price, stock, category, extra);
+        }
+
+        inventory.push_back(newProd);
+        saveProducts();
+        return newProd;
+    }
+
+    bool updateProduct(int id, const string& title, const string& brand, float price, int stock, const string& category, const string& extra) {
+        for (size_t i = 0; i < inventory.size(); ++i) {
+            if (inventory[i] != nullptr && inventory[i]->getId() == id) {
+                if (inventory[i]->getType() != category) {
+                    delete inventory[i];
+                    if (category == "electronics") {
+                        int w = 1;
+                        try { w = stoi(extra); } catch (...) { w = 1; }
+                        inventory[i] = new Electronics(id, title, brand, price, stock, w);
+                    } else if (category == "clothing") {
+                        inventory[i] = new Clothing(id, title, brand, price, stock, extra.empty() ? "M" : extra);
+                    } else {
+                        inventory[i] = new GeneralProduct(id, title, brand, price, stock, category, extra);
+                    }
+                } else {
+                    inventory[i]->setTitle(title);
+                    inventory[i]->setBrand(brand);
+                    inventory[i]->setPrice(price);
+                    inventory[i]->setStock(stock);
+                    inventory[i]->setExtra(extra);
+                }
+                saveProducts();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool deleteProduct(int id) {
+        for (auto it = inventory.begin(); it != inventory.end(); ++it) {
+            if (*it != nullptr && (*it)->getId() == id) {
+                delete *it;
+                inventory.erase(it);
+                saveProducts();
+                return true;
+            }
+        }
+        return false;
+    }
+
     void displayAll() {
         cout << "\n---------------- AVAILABLE INVENTORY ----------------\n";
         cout << "ID\tItem\t\tBrand\t\tPrice\t\tStock\tDetails\n";
         cout << "-----------------------------------------------------\n";
-        for (int i = 0; i < 6; i++) {
+        for (Product* p : inventory) {
             // Polymorphism in action
-            inventory[i]->showInfo();
+            if (p != nullptr) p->showInfo();
         }
         cout << "-----------------------------------------------------\n";
-    }
-
-    Product* searchProduct(int id) {
-        for (int i = 0; i < 6; i++) {
-            if (inventory[i]->getId() == id) {
-                return inventory[i];
-            }
-        }
-        return NULL;
     }
 
     string getProductsJson() {
         stringstream ss;
         ss << "[";
-        for (int i = 0; i < 6; i++) {
-            ss << inventory[i]->toJson();
-            if (i < 5) ss << ",";
+        for (size_t i = 0; i < inventory.size(); ++i) {
+            if (inventory[i] != nullptr) {
+                ss << inventory[i]->toJson();
+                if (i + 1 < inventory.size()) ss << ",";
+            }
         }
         ss << "]";
         return ss.str();
@@ -254,8 +560,9 @@ public:
 
     bool restockProduct(int id, int qty) {
         Product* p = searchProduct(id);
-        if (p != NULL && qty > 0) {
+        if (p != nullptr && qty > 0) {
             p->restock(qty);
+            saveProducts();
             return true;
         }
         return false;
@@ -263,9 +570,9 @@ public:
 
     int getTotalStock() {
         int total = 0;
-        for (int i = 0; i < 6; i++) {
-            if (inventory[i] != NULL) {
-                total += inventory[i]->getStock();
+        for (Product* p : inventory) {
+            if (p != nullptr) {
+                total += p->getStock();
             }
         }
         return total;
@@ -445,6 +752,44 @@ inline bool saveNewUser(const UserAccount& newUser) {
 }
 
 // ==========================================
+// JSON PARSING UTILITIES
+// ==========================================
+inline string jsonExtractStr(const string& body, const string& key) {
+    string search = "\"" + key + "\"";
+    size_t pos = body.find(search);
+    if (pos == string::npos) return "";
+    size_t colon = body.find(":", pos + search.length());
+    if (colon == string::npos) return "";
+    size_t firstQuote = body.find("\"", colon + 1);
+    if (firstQuote == string::npos) return "";
+    size_t secondQuote = body.find("\"", firstQuote + 1);
+    if (secondQuote == string::npos) return "";
+    return body.substr(firstQuote + 1, secondQuote - firstQuote - 1);
+}
+
+inline float jsonExtractFloat(const string& body, const string& key) {
+    string search = "\"" + key + "\"";
+    size_t pos = body.find(search);
+    if (pos == string::npos) return 0.0f;
+    size_t colon = body.find(":", pos + search.length());
+    if (colon == string::npos) return 0.0f;
+    size_t start = colon + 1;
+    while (start < body.length() && (body[start] == ' ' || body[start] == '\t' || body[start] == '"')) start++;
+    size_t end = start;
+    while (end < body.length() && (isdigit(body[end]) || body[end] == '.' || body[end] == '-')) end++;
+    if (start >= end) return 0.0f;
+    try {
+        return stof(body.substr(start, end - start));
+    } catch (...) {
+        return 0.0f;
+    }
+}
+
+inline int jsonExtractInt(const string& body, const string& key) {
+    return (int)jsonExtractFloat(body, key);
+}
+
+// ==========================================
 // 7. MAIN FUNCTION
 // ==========================================
 int main() {
@@ -512,6 +857,7 @@ int main() {
         Product* item = myStore.searchProduct(pId);
         if (item != NULL) {
             if (item->checkAndDeduct(qty)) {
+                myStore.saveProducts();
                 Customer currentCustomer(customerName);
                 currentCustomer.addItem(pId, qty);
                 printReceipt(currentCustomer, myStore);
@@ -859,6 +1205,122 @@ int main() {
         } else {
             res.status = 400;
             res.set_content("{\"status\": \"error\", \"message\": \"Failed to restock. Invalid Product ID or quantity.\"}", "application/json");
+        }
+    });
+
+    // ==========================================
+    // CATEGORY MANAGEMENT ENDPOINTS
+    // ==========================================
+    // Public & Admin: Fetch all registered categories
+    svr.Get("/api/categories", [&](const httplib::Request& req, httplib::Response& res) {
+        res.set_content(myStore.getCategoriesJson(), "application/json");
+    });
+
+    // Admin: Add a new product category
+    svr.Post("/api/admin/categories/add", [&](const httplib::Request& req, httplib::Response& res) {
+        string key = jsonExtractStr(req.body, "key");
+        string label = jsonExtractStr(req.body, "label");
+
+        auto trimStr = [](string s) -> string {
+            while (!s.empty() && (s.back() == ' ' || s.back() == '\t' || s.back() == '\r')) s.pop_back();
+            size_t start = 0;
+            while (start < s.length() && (s[start] == ' ' || s[start] == '\t' || s[start] == '\r')) start++;
+            return s.substr(start);
+        };
+        key = trimStr(key);
+        label = trimStr(label);
+        for (char& c : key) c = tolower(c);
+        for (size_t i = 0; i < key.length(); i++) {
+            if (key[i] == ' ' || key[i] == '_') key[i] = '-';
+        }
+
+        if (key.empty()) {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Category key cannot be empty.\"}", "application/json");
+            return;
+        }
+
+        if (label.empty()) label = key;
+
+        if (myStore.addCategory(key, label)) {
+            res.set_content("{\"status\": \"success\", \"message\": \"Category added successfully!\", \"categories\": " + myStore.getCategoriesJson() + "}", "application/json");
+        } else {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Category key already exists or is invalid.\"}", "application/json");
+        }
+    });
+
+    // ==========================================
+    // PRODUCT CRUD ENDPOINTS (Admin Only)
+    // ==========================================
+    // Admin: Add a new product
+    svr.Post("/api/admin/products/add", [&](const httplib::Request& req, httplib::Response& res) {
+        string title = jsonExtractStr(req.body, "title");
+        string brand = jsonExtractStr(req.body, "brand");
+        float price = jsonExtractFloat(req.body, "price");
+        int stock = jsonExtractInt(req.body, "stock");
+        string category = jsonExtractStr(req.body, "category");
+        string extra = jsonExtractStr(req.body, "extra");
+
+        if (title.empty() || brand.empty() || price <= 0) {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Product title, brand, and a valid price (> 0) are required.\"}", "application/json");
+            return;
+        }
+
+        if (category.empty()) category = "general";
+        if (stock < 0) stock = 0;
+
+        Product* p = myStore.addProduct(title, brand, price, stock, category, extra);
+        if (p != nullptr) {
+            res.set_content("{\"status\": \"success\", \"message\": \"Product added successfully!\", \"product\": " + p->toJson() + "}", "application/json");
+        } else {
+            res.status = 500;
+            res.set_content("{\"status\": \"error\", \"message\": \"Failed to create product in inventory.\"}", "application/json");
+        }
+    });
+
+    // Admin: Update existing product
+    svr.Post("/api/admin/products/update", [&](const httplib::Request& req, httplib::Response& res) {
+        int id = jsonExtractInt(req.body, "id");
+        string title = jsonExtractStr(req.body, "title");
+        string brand = jsonExtractStr(req.body, "brand");
+        float price = jsonExtractFloat(req.body, "price");
+        int stock = jsonExtractInt(req.body, "stock");
+        string category = jsonExtractStr(req.body, "category");
+        string extra = jsonExtractStr(req.body, "extra");
+
+        if (id <= 0 || title.empty() || brand.empty() || price <= 0) {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Valid product ID, title, brand, and price are required.\"}", "application/json");
+            return;
+        }
+
+        if (category.empty()) category = "general";
+        if (stock < 0) stock = 0;
+
+        if (myStore.updateProduct(id, title, brand, price, stock, category, extra)) {
+            res.set_content("{\"status\": \"success\", \"message\": \"Product updated successfully!\"}", "application/json");
+        } else {
+            res.status = 404;
+            res.set_content("{\"status\": \"error\", \"message\": \"Product not found with ID " + to_string(id) + "\"}", "application/json");
+        }
+    });
+
+    // Admin: Delete product
+    svr.Post("/api/admin/products/delete", [&](const httplib::Request& req, httplib::Response& res) {
+        int id = jsonExtractInt(req.body, "id");
+        if (id <= 0) {
+            res.status = 400;
+            res.set_content("{\"status\": \"error\", \"message\": \"Valid product ID is required.\"}", "application/json");
+            return;
+        }
+
+        if (myStore.deleteProduct(id)) {
+            res.set_content("{\"status\": \"success\", \"message\": \"Product removed from catalog successfully!\"}", "application/json");
+        } else {
+            res.status = 404;
+            res.set_content("{\"status\": \"error\", \"message\": \"Product with ID " + to_string(id) + " not found.\"}", "application/json");
         }
     });
 

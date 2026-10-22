@@ -584,6 +584,11 @@
             border: 1px solid var(--border-subtle);
         }
 
+        .product-icon-wrap svg {
+            inline-size: 34px;
+            block-size: 34px;
+        }
+
         .product-card:hover .product-icon-wrap {
             transform: scale(1.08) rotate(3deg);
         }
@@ -1776,25 +1781,28 @@
                     <span class="nav-badge" id="badge-all">6</span>
                 </li>
 
-                <li class="nav-item" onclick="switchCategory('electronics', this)" id="nav-electronics">
-                    <div class="nav-item-content">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span>Electronics</span>
-                    </div>
-                    <span class="nav-badge" id="badge-electronics">3</span>
-                </li>
+                <!-- Dynamic Storefront Categories Container -->
+                <div id="dynamicCategoriesNav" style="display: contents;">
+                    <li class="nav-item" onclick="switchCategory('electronics', this)" id="nav-electronics">
+                        <div class="nav-item-content">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            <span>Electronics</span>
+                        </div>
+                        <span class="nav-badge" id="badge-electronics">0</span>
+                    </li>
 
-                <li class="nav-item" onclick="switchCategory('clothing', this)" id="nav-clothing">
-                    <div class="nav-item-content">
-                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span>Fashion & Apparel</span>
-                    </div>
-                    <span class="nav-badge" id="badge-clothing">3</span>
-                </li>
+                    <li class="nav-item" onclick="switchCategory('clothing', this)" id="nav-clothing">
+                        <div class="nav-item-content">
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            <span>Fashion & Apparel</span>
+                        </div>
+                        <span class="nav-badge" id="badge-clothing">0</span>
+                    </li>
+                </div>
 
                 <li class="nav-item" onclick="scrollToCart()" id="nav-cart">
                     <div class="nav-item-content">
@@ -1939,7 +1947,7 @@
 
                 <!-- Brand Filter Chips & Sorting -->
                 <div class="filter-bar" style="margin-bottom: 24px;">
-                    <div class="filter-chips">
+                    <div class="filter-chips" id="brandFilterChips">
                         <button class="filter-btn active" onclick="filterByBrand('all', this)">All Brands</button>
                         <button class="filter-btn" onclick="filterByBrand('Apple', this)">Apple</button>
                         <button class="filter-btn" onclick="filterByBrand('Samsung', this)">Samsung</button>
@@ -2170,14 +2178,33 @@
                     </table>
                 </div>
 
-                <!-- Tab 3: Inventory & Restock -->
+                <!-- Tab 3: Inventory & Product Management -->
                 <div id="tabContentStock" class="admin-card" style="display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
                         <div>
-                            <h3 style="font-size: 16px; font-weight: 800;">Inventory Control</h3>
-                            <p style="font-size: 12.5px; color: var(--text-muted);">Real-time C++ in-memory stock management with Restock operations.</p>
+                            <h3 style="font-size: 16px; font-weight: 800; color: var(--text-main);">Inventory & Catalog Management</h3>
+                            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">Add, update, restock, or remove catalog products and manage mall categories with real-time C++ persistence.</p>
                         </div>
-                        <button class="filter-btn" onclick="fetchCatalog(); loadAdminAnalytics();">Sync Catalog</button>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                            <button class="add-cart-btn" onclick="openAddProductModal()" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                                <svg style="inline-size: 16px; block-size: 16px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>Add Product</span>
+                            </button>
+                            <button class="filter-btn" onclick="openCategoriesModal()" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 700; cursor: pointer;">
+                                <svg style="inline-size: 16px; block-size: 16px; color: #475569;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                                <span>Categories</span>
+                            </button>
+                            <button class="filter-btn" onclick="fetchCatalog(); loadAdminAnalytics();" style="display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; font-weight: 600; cursor: pointer;">
+                                <svg style="inline-size: 15px; block-size: 15px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                <span>Sync</span>
+                            </button>
+                        </div>
                     </div>
                     <table class="admin-table">
                         <thead>
@@ -2188,7 +2215,8 @@
                                 <th>Category</th>
                                 <th>Price</th>
                                 <th>Current Stock</th>
-                                <th>Quick Restock (Middleware Protected)</th>
+                                <th>Specs / Extra</th>
+                                <th>Actions & Restock</th>
                             </tr>
                         </thead>
                         <tbody id="adminStockTableBody">
@@ -2468,6 +2496,208 @@
                     </div>
                 </div>
             </div>
+
+            <!-- =========================================
+                 ADD PRODUCT MODAL
+                 ========================================= -->
+            <div id="addProductModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div style="background: white; border-radius: 20px; inline-size: 100%; max-inline-size: 560px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(226, 232, 240, 0.8); overflow: hidden; animation: invoiceFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 22px 28px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="inline-size: 40px; block-size: 40px; border-radius: 12px; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(37, 99, 235, 0.4); display: flex; align-items: center; justify-content: center; color: #60a5fa;">
+                                <svg style="inline-size: 22px; block-size: 22px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 800; letter-spacing: -0.01em; margin: 0;">Add New Product</h3>
+                                <p style="font-size: 12.5px; color: #94a3b8; margin: 2px 0 0 0;">Create and publish a new item into store catalog</p>
+                            </div>
+                        </div>
+                        <button onclick="closeAddProductModal()" style="background: rgba(255,255,255,0.08); border: none; color: #cbd5e1; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s;">✕</button>
+                    </div>
+
+                    <!-- Form Body -->
+                    <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Product Title *</label>
+                            <input id="addProdTitle" type="text" placeholder="e.g. Sony WH-1000XM5 Headphones" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Brand *</label>
+                                <input id="addProdBrand" type="text" placeholder="e.g. Sony" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Category *</label>
+                                <select id="addProdCategory" onchange="handleAddCategoryChange()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none; background: white; cursor: pointer;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Price (Rs.) *</label>
+                                <input id="addProdPrice" type="number" min="1" step="any" placeholder="e.g. 45000" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 700; color: #2563eb; outline: none;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Initial Stock Units *</label>
+                                <input id="addProdStock" type="number" min="0" placeholder="e.g. 15" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label id="addProdExtraLabel" style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Specification / Extra Detail</label>
+                            <input id="addProdExtra" type="text" placeholder="e.g. 2 Yr Warranty or Size: M or Spec details" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                            <span id="addProdExtraHelp" style="display: block; font-size: 11px; color: #94a3b8; margin-top: 4px;">Electronics uses Warranty (Years). Clothing uses Size (e.g. S, M, L, XL).</span>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div style="padding: 16px 28px 24px; display: flex; justify-content: flex-end; gap: 10px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                        <button onclick="closeAddProductModal()" style="padding: 10px 20px; border-radius: 10px; border: 1px solid #cbd5e1; background: white; font-weight: 700; font-size: 13.5px; color: var(--text-muted); cursor: pointer;">Cancel</button>
+                        <button onclick="submitAddProduct()" style="padding: 10px 24px; border-radius: 10px; border: none; background: linear-gradient(135deg, #2563eb, #1d4ed8); font-weight: 700; font-size: 13.5px; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.3); display: flex; align-items: center; gap: 6px;">
+                            <span>Publish Product</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =========================================
+                 EDIT PRODUCT MODAL
+                 ========================================= -->
+            <div id="editProductModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div style="background: white; border-radius: 20px; inline-size: 100%; max-inline-size: 560px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(226, 232, 240, 0.8); overflow: hidden; animation: invoiceFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 22px 28px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="inline-size: 40px; block-size: 40px; border-radius: 12px; background: rgba(79, 70, 229, 0.2); border: 1px solid rgba(79, 70, 229, 0.4); display: flex; align-items: center; justify-content: center; color: #a5b4fc;">
+                                <svg style="inline-size: 20px; block-size: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <h3 style="font-size: 18px; font-weight: 800; letter-spacing: -0.01em; margin: 0;">Update Product</h3>
+                                    <span id="editProdIdBadge" style="background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 9999px; font-size: 12px; font-weight: 700; color: #93c5fd;">#1</span>
+                                </div>
+                                <p style="font-size: 12.5px; color: #94a3b8; margin: 2px 0 0 0;">Modify product specifications, pricing, and stock</p>
+                            </div>
+                        </div>
+                        <button onclick="closeEditProductModal()" style="background: rgba(255,255,255,0.08); border: none; color: #cbd5e1; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s;">✕</button>
+                    </div>
+
+                    <!-- Hidden ID -->
+                    <input type="hidden" id="editProdId">
+
+                    <!-- Form Body -->
+                    <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Product Title *</label>
+                            <input id="editProdTitle" type="text" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Brand *</label>
+                                <input id="editProdBrand" type="text" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Category *</label>
+                                <select id="editProdCategory" onchange="handleEditCategoryChange()" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none; background: white; cursor: pointer;">
+                                    <!-- Populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Price (Rs.) *</label>
+                                <input id="editProdPrice" type="number" min="1" step="any" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 700; color: #2563eb; outline: none;">
+                            </div>
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Current Stock *</label>
+                                <input id="editProdStock" type="number" min="0" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label id="editProdExtraLabel" style="display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;">Specification / Extra</label>
+                            <input id="editProdExtra" type="text" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-weight: 600; outline: none;">
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div style="padding: 16px 28px 24px; display: flex; justify-content: flex-end; gap: 10px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                        <button onclick="closeEditProductModal()" style="padding: 10px 20px; border-radius: 10px; border: 1px solid #cbd5e1; background: white; font-weight: 700; font-size: 13.5px; color: var(--text-muted); cursor: pointer;">Cancel</button>
+                        <button onclick="submitEditProduct()" style="padding: 10px 24px; border-radius: 10px; border: none; background: linear-gradient(135deg, #4f46e5, #4338ca); font-weight: 700; font-size: 13.5px; color: white; cursor: pointer; box-shadow: 0 4px 12px rgba(79,70,229,0.3); display: flex; align-items: center; gap: 6px;">
+                            <span>Update Changes</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =========================================
+                 MANAGE CATEGORIES MODAL
+                 ========================================= -->
+            <div id="manageCategoriesModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+                <div style="background: white; border-radius: 20px; inline-size: 100%; max-inline-size: 580px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(226, 232, 240, 0.8); overflow: hidden; animation: invoiceFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 22px 28px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="inline-size: 40px; block-size: 40px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; color: #6ee7b7;">
+                                <svg style="inline-size: 20px; block-size: 20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 style="font-size: 18px; font-weight: 800; letter-spacing: -0.01em; margin: 0;">Category Management</h3>
+                                <p style="font-size: 12.5px; color: #94a3b8; margin: 2px 0 0 0;">Add custom product departments to your store</p>
+                            </div>
+                        </div>
+                        <button onclick="closeCategoriesModal()" style="background: rgba(255,255,255,0.08); border: none; color: #cbd5e1; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s;">✕</button>
+                    </div>
+
+                    <!-- Body -->
+                    <div style="padding: 24px 28px; display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Current Categories List -->
+                        <div>
+                            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Existing Categories</div>
+                            <div id="categoriesListContainer" style="display: flex; flex-direction: column; gap: 8px; max-block-size: 180px; overflow-y: auto; padding-right: 4px;">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Add Category Form -->
+                        <div style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 18px;">
+                            <div style="font-size: 13.5px; font-weight: 800; color: var(--text-main); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                                <span>➕ Add New Store Category</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Category Key (slug) *</label>
+                                    <input id="newCatKey" type="text" placeholder="e.g. groceries" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; outline: none; background: white;">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">Display Name / Label *</label>
+                                    <input id="newCatLabel" type="text" placeholder="e.g. Fresh Groceries" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; outline: none; background: white;">
+                                </div>
+                            </div>
+                            <button onclick="submitAddCategory()" style="width: 100%; padding: 9px; border-radius: 8px; border: none; background: #059669; font-weight: 700; font-size: 13px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 8px rgba(5,150,105,0.25);">
+                                <span>Create Category</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Footer Actions -->
+                    <div style="padding: 14px 28px 20px; display: flex; justify-content: flex-end; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                        <button onclick="closeCategoriesModal()" style="padding: 9px 22px; border-radius: 10px; border: 1px solid #cbd5e1; background: white; font-weight: 700; font-size: 13.5px; color: var(--text-main); cursor: pointer;">Done</button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
     </div> <!-- End #appShell -->
@@ -2480,6 +2710,10 @@
          ========================================= -->
     <script>
         let catalog = [];
+        let categories = [
+            { key: "electronics", label: "Electronics" },
+            { key: "clothing", label: "Fashion & Apparel" }
+        ];
         let cart = [];
         let totalOrders = 0;
         let currentCategory = 'all';
@@ -2487,6 +2721,31 @@
         let currentSearchQuery = '';
         let currentUser = null; // { name, username, role, token }
         let adminToken = "";
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function getCategoryIcon(catKey) {
+            if (catKey === 'electronics') {
+                return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>`;
+            } else if (catKey === 'clothing') {
+                return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>`;
+            } else if (catKey === 'groceries' || catKey === 'food') {
+                return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>`;
+            } else if (catKey === 'sports' || catKey === 'fitness') {
+                return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>`;
+            } else if (catKey === 'footwear' || catKey === 'shoes') {
+                return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>`;
+            }
+            return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>`;
+        }
 
         // Product visual illustration icons
         const productIcons = {
@@ -2532,11 +2791,75 @@
             showToast("Downloaded receipts.txt", "success");
         }
 
+        async function fetchCategories() {
+            try {
+                const response = await fetch('/api/categories');
+                categories = await response.json();
+                renderCategoriesNav();
+                populateCategoryDropdowns();
+            } catch (err) {
+                console.error("Failed to load categories", err);
+            }
+        }
+
+        function renderCategoriesNav() {
+            const container = document.getElementById("dynamicCategoriesNav");
+            if (!container) return;
+            let html = "";
+            categories.forEach(cat => {
+                const count = catalog.filter(i => i.type === cat.key).length;
+                const isActive = currentCategory === cat.key ? "active" : "";
+                const icon = getCategoryIcon(cat.key);
+                html += `
+                    <li class="nav-item ${isActive}" onclick="switchCategory('${cat.key}', this)" id="nav-${cat.key}">
+                        <div class="nav-item-content">
+                            ${icon}
+                            <span>${escapeHtml(cat.label)}</span>
+                        </div>
+                        <span class="nav-badge" id="badge-${cat.key}">${count}</span>
+                    </li>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function populateCategoryDropdowns() {
+            const addSelect = document.getElementById("addProdCategory");
+            const editSelect = document.getElementById("editProdCategory");
+            
+            let optionsHtml = "";
+            categories.forEach(cat => {
+                optionsHtml += `<option value="${cat.key}">${escapeHtml(cat.label)}</option>`;
+            });
+
+            if (addSelect) {
+                addSelect.innerHTML = optionsHtml;
+            }
+            if (editSelect) {
+                editSelect.innerHTML = optionsHtml;
+            }
+        }
+
+        function renderBrandFilterChips() {
+            const container = document.getElementById("brandFilterChips");
+            if (!container) return;
+            const uniqueBrands = Array.from(new Set(catalog.map(i => i.brand))).filter(Boolean);
+            let html = `<button class="filter-btn ${currentBrand === 'all' ? 'active' : ''}" onclick="filterByBrand('all', this)">All Brands</button>`;
+            uniqueBrands.forEach(b => {
+                const isActive = currentBrand.toLowerCase() === b.toLowerCase() ? 'active' : '';
+                html += `<button class="filter-btn ${isActive}" onclick="filterByBrand('${b.replace(/'/g, "\\'")}', this)">${escapeHtml(b)}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
         async function fetchCatalog() {
             try {
+                await fetchCategories();
                 const response = await fetch('/api/products');
                 catalog = await response.json();
                 updateMetrics();
+                renderBrandFilterChips();
+                renderCategoriesNav();
                 renderCatalog();
                 renderAdminStockTable();
             } catch (err) {
@@ -2560,23 +2883,36 @@
             const totalStock = catalog.reduce((sum, item) => sum + item.stock, 0);
             const brands = new Set(catalog.map(item => item.brand)).size;
 
-            document.getElementById("metricTotalItems").innerText = totalItems;
-            document.getElementById("metricInStock").innerText = totalStock;
-            document.getElementById("metricBrands").innerText = brands;
-            document.getElementById("metricOrders").innerText = totalOrders;
+            const metricTotalEl = document.getElementById("metricTotalItems");
+            if (metricTotalEl) metricTotalEl.innerText = totalItems;
+            const metricStockEl = document.getElementById("metricInStock");
+            if (metricStockEl) metricStockEl.innerText = totalStock;
+            const metricBrandsEl = document.getElementById("metricBrands");
+            if (metricBrandsEl) metricBrandsEl.innerText = brands;
+            const metricOrdersEl = document.getElementById("metricOrders");
+            if (metricOrdersEl) metricOrdersEl.innerText = totalOrders;
 
-            const electCount = catalog.filter(i => i.type === "electronics").length;
-            const clothCount = catalog.filter(i => i.type === "clothing").length;
-            document.getElementById("badge-all").innerText = totalItems;
-            document.getElementById("badge-electronics").innerText = electCount;
-            document.getElementById("badge-clothing").innerText = clothCount;
+            const badgeAll = document.getElementById("badge-all");
+            if (badgeAll) badgeAll.innerText = totalItems;
+
+            categories.forEach(cat => {
+                const badge = document.getElementById(`badge-${cat.key}`);
+                if (badge) {
+                    badge.innerText = catalog.filter(i => i.type === cat.key).length;
+                }
+            });
         }
 
         function switchCategory(category, element) {
             showCustomerView();
             currentCategory = category;
             document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
-            if (element) element.classList.add("active");
+            if (element) {
+                element.classList.add("active");
+            } else {
+                const navEl = document.getElementById(`nav-${category}`);
+                if (navEl) navEl.classList.add("active");
+            }
             renderCatalog();
             document.getElementById("sidebar").classList.remove("open");
         }
@@ -2634,8 +2970,9 @@
 
             filtered.forEach(item => {
                 let specBadge = "Base Item";
-                if (item.type === "electronics") specBadge = `${item.warrantyYear} Yr Warranty`;
-                if (item.type === "clothing") specBadge = `Size: ${item.size}`;
+                if (item.type === "electronics") specBadge = `${item.warrantyYear || item.extra || 1} Yr Warranty`;
+                else if (item.type === "clothing") specBadge = item.size ? `Size: ${item.size}` : (item.extra || "Size: M");
+                else if (item.extra) specBadge = item.extra;
 
                 let stockClass = "in-stock";
                 let stockText = `${item.stock} in Stock`;
@@ -2647,12 +2984,14 @@
                     stockText = `Only ${item.stock} left`;
                 }
 
-                const icon = productIcons[item.id] || productIcons[1];
+                const catObj = categories.find(c => c.key === item.type);
+                const catLabel = catObj ? catObj.label : item.type;
+                const icon = productIcons[item.id] || getCategoryIcon(item.type);
 
                 grid.innerHTML += `
                     <div class="product-card">
                         <div class="product-visual">
-                            <span class="product-category-badge">${item.type}</span>
+                            <span class="product-category-badge">${escapeHtml(catLabel)}</span>
                             <div class="stock-indicator ${stockClass}">${stockText}</div>
                             <div class="product-icon-wrap">
                                 ${icon}
@@ -3367,6 +3706,11 @@
             document.querySelectorAll(".nav-item").forEach(item => item.classList.remove("active"));
             document.getElementById("nav-all").classList.add("active");
             document.getElementById("sidebar").classList.remove("open");
+            currentCategory = "all";
+            currentBrand = "all";
+            currentSearchQuery = "";
+            const searchBox = document.getElementById("searchInput");
+            if (searchBox) searchBox.value = "";
 
             // Pre-fill customer name in checkout
             if (currentUser && currentUser.name) {
@@ -3392,10 +3736,10 @@
             if (navAdmin) navAdmin.classList.add("active");
             document.getElementById("sidebar").classList.remove("open");
 
+            fetchCatalog();
             loadAdminAnalytics();
             loadAdminUsers();
             loadAdminOrders();
-            renderAdminStockTable();
             fetchHistory();
         }
 
@@ -3538,24 +3882,42 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
+            if (catalog.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px;">No products in inventory yet. Click "+ Add Product" to get started!</td></tr>`;
+                return;
+            }
+
             catalog.forEach(item => {
-                let badge = "electronics";
-                if (item.type === "clothing") badge = "clothing";
+                const catObj = categories.find(c => c.key === item.type);
+                const catLabel = catObj ? catObj.label : item.type;
+
+                let extraDisplay = item.extra || "-";
+                if (item.type === "electronics" && item.warrantyYear) {
+                    extraDisplay = `${item.warrantyYear} Yr Warranty`;
+                } else if (item.type === "clothing" && item.size) {
+                    extraDisplay = `Size: ${item.size}`;
+                }
 
                 tbody.innerHTML += `
                     <tr>
-                        <td>#${item.id}</td>
-                        <td><strong>${item.title}</strong></td>
-                        <td>${item.brand}</td>
-                        <td><span style="text-transform: capitalize; font-size: 11.5px; font-weight: 600; color: var(--text-muted);">${badge}</span></td>
-                        <td>Rs. ${item.price.toLocaleString()}</td>
+                        <td><span style="font-family: monospace; font-weight: 700; color: var(--text-muted);">#${item.id}</span></td>
+                        <td><strong style="color: var(--text-main); font-size: 13.5px;">${escapeHtml(item.title)}</strong></td>
+                        <td><span style="color: #475569; font-weight: 600;">${escapeHtml(item.brand)}</span></td>
                         <td>
-                            <strong style="color: ${item.stock <= 4 ? '#b45309' : '#059669'}; font-size: 14px;">${item.stock} Units</strong>
+                            <span style="display: inline-block; padding: 3px 10px; border-radius: 9999px; font-size: 11px; font-weight: 700; background: #f1f5f9; color: var(--primary); text-transform: capitalize; border: 1px solid #e2e8f0;">
+                                ${escapeHtml(catLabel)}
+                            </span>
                         </td>
+                        <td style="font-weight: 700; color: #2563eb;">Rs. ${Number(item.price).toLocaleString()}</td>
                         <td>
-                            <div style="display: flex; gap: 6px;">
-                                <button class="restock-btn" onclick="restockItem(${item.id}, 5)">+5 Stock</button>
-                                <button class="restock-btn" style="background: #4f46e5;" onclick="restockItem(${item.id}, 10)">+10 Stock</button>
+                            <strong style="color: ${item.stock <= 4 ? '#b45309' : '#059669'}; font-size: 13.5px;">${item.stock} Units</strong>
+                        </td>
+                        <td style="font-size: 12.5px; color: var(--text-muted); font-weight: 500;">${escapeHtml(extraDisplay)}</td>
+                        <td>
+                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                <button class="restock-btn" onclick="restockItem(${item.id}, 5)" title="Add 5 to stock">+5</button>
+                                <button class="restock-btn" style="background: #4f46e5;" onclick="openEditProductModal(${item.id})" title="Edit product details">✏️ Edit</button>
+                                <button class="restock-btn" style="background: #dc2626;" onclick="deleteProductItem(${item.id}, '${escapeHtml(item.title).replace(/'/g, "\\'")}')" title="Delete product from catalog">🗑️ Delete</button>
                             </div>
                         </td>
                     </tr>
@@ -3591,6 +3953,341 @@
             } catch(e) {
                 console.error("Restock error", e);
                 showToast("Network error executing restock", "error");
+            }
+        }
+
+        // ==========================================
+        // PRODUCT CRUD CONTROLLER
+        // ==========================================
+        function openAddProductModal() {
+            populateCategoryDropdowns();
+            document.getElementById("addProdTitle").value = "";
+            document.getElementById("addProdBrand").value = "";
+            document.getElementById("addProdPrice").value = "";
+            document.getElementById("addProdStock").value = "10";
+            document.getElementById("addProdExtra").value = "";
+            handleAddCategoryChange();
+            const modal = document.getElementById("addProductModal");
+            if (modal) modal.style.display = "flex";
+        }
+
+        function closeAddProductModal() {
+            const modal = document.getElementById("addProductModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        function handleAddCategoryChange() {
+            const cat = document.getElementById("addProdCategory").value;
+            const extraLabel = document.getElementById("addProdExtraLabel");
+            const extraHelp = document.getElementById("addProdExtraHelp");
+            const extraInput = document.getElementById("addProdExtra");
+
+            if (cat === "electronics") {
+                extraLabel.innerText = "Warranty Period (Years) *";
+                extraInput.placeholder = "e.g. 1 or 2";
+                extraHelp.innerText = "Numeric years of manufacturer warranty";
+            } else if (cat === "clothing") {
+                extraLabel.innerText = "Size (e.g. S, M, L, XL) *";
+                extraInput.placeholder = "e.g. L or XL or Medium";
+                extraHelp.innerText = "Apparel sizing specifications";
+            } else {
+                extraLabel.innerText = "Specification / Attribute";
+                extraInput.placeholder = "e.g. 1 Kg Pack, Color: Black, Edition: 2026";
+                extraHelp.innerText = "Custom attributes for this category";
+            }
+        }
+
+        async function submitAddProduct() {
+            const title = document.getElementById("addProdTitle").value.trim();
+            const brand = document.getElementById("addProdBrand").value.trim();
+            const category = document.getElementById("addProdCategory").value;
+            const price = parseFloat(document.getElementById("addProdPrice").value);
+            const stock = parseInt(document.getElementById("addProdStock").value, 10);
+            const extra = document.getElementById("addProdExtra").value.trim();
+
+            if (!title) {
+                showToast("Please enter product title", "error");
+                return;
+            }
+            if (!brand) {
+                showToast("Please enter product brand", "error");
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                showToast("Please enter a valid price greater than 0", "error");
+                return;
+            }
+            if (isNaN(stock) || stock < 0) {
+                showToast("Please enter valid non-negative stock quantity", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/products/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': adminToken
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        brand: brand,
+                        category: category,
+                        price: price,
+                        stock: stock,
+                        extra: extra
+                    })
+                });
+
+                if (response.status === 401) {
+                    showToast("Unauthorized: Admin middleware rejected action", "error");
+                    adminLogout();
+                    return;
+                }
+
+                const resJson = await response.json();
+                if (resJson.status === "success") {
+                    showToast(resJson.message || "Product added successfully!", "success");
+                    closeAddProductModal();
+                    await fetchCatalog();
+                    await loadAdminAnalytics();
+                } else {
+                    showToast(resJson.message || "Failed to add product", "error");
+                }
+            } catch (err) {
+                console.error("Add product error", err);
+                showToast("Network error creating product", "error");
+            }
+        }
+
+        function openEditProductModal(id) {
+            const item = catalog.find(p => p.id === id);
+            if (!item) {
+                showToast("Product not found!", "error");
+                return;
+            }
+
+            populateCategoryDropdowns();
+            document.getElementById("editProdId").value = item.id;
+            document.getElementById("editProdIdBadge").innerText = `#${item.id}`;
+            document.getElementById("editProdTitle").value = item.title;
+            document.getElementById("editProdBrand").value = item.brand;
+            document.getElementById("editProdCategory").value = item.type;
+            document.getElementById("editProdPrice").value = item.price;
+            document.getElementById("editProdStock").value = item.stock;
+
+            let extraVal = item.extra || "";
+            if (item.type === "electronics" && item.warrantyYear) extraVal = String(item.warrantyYear);
+            else if (item.type === "clothing" && item.size) extraVal = String(item.size);
+            document.getElementById("editProdExtra").value = extraVal;
+
+            handleEditCategoryChange();
+            const modal = document.getElementById("editProductModal");
+            if (modal) modal.style.display = "flex";
+        }
+
+        function closeEditProductModal() {
+            const modal = document.getElementById("editProductModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        function handleEditCategoryChange() {
+            const cat = document.getElementById("editProdCategory").value;
+            const extraLabel = document.getElementById("editProdExtraLabel");
+            const extraInput = document.getElementById("editProdExtra");
+
+            if (cat === "electronics") {
+                extraLabel.innerText = "Warranty Period (Years)";
+                extraInput.placeholder = "e.g. 1 or 2";
+            } else if (cat === "clothing") {
+                extraLabel.innerText = "Size (e.g. S, M, L, XL)";
+                extraInput.placeholder = "e.g. M, L, XL";
+            } else {
+                extraLabel.innerText = "Specification / Attribute";
+                extraInput.placeholder = "e.g. 1 Kg Pack, Color: Red";
+            }
+        }
+
+        async function submitEditProduct() {
+            const id = parseInt(document.getElementById("editProdId").value, 10);
+            const title = document.getElementById("editProdTitle").value.trim();
+            const brand = document.getElementById("editProdBrand").value.trim();
+            const category = document.getElementById("editProdCategory").value;
+            const price = parseFloat(document.getElementById("editProdPrice").value);
+            const stock = parseInt(document.getElementById("editProdStock").value, 10);
+            const extra = document.getElementById("editProdExtra").value.trim();
+
+            if (!id || id <= 0) {
+                showToast("Invalid product ID", "error");
+                return;
+            }
+            if (!title || !brand) {
+                showToast("Title and brand cannot be empty", "error");
+                return;
+            }
+            if (isNaN(price) || price <= 0) {
+                showToast("Valid price greater than 0 required", "error");
+                return;
+            }
+            if (isNaN(stock) || stock < 0) {
+                showToast("Valid stock quantity required", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/products/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': adminToken
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        title: title,
+                        brand: brand,
+                        category: category,
+                        price: price,
+                        stock: stock,
+                        extra: extra
+                    })
+                });
+
+                if (response.status === 401) {
+                    showToast("Unauthorized: Admin middleware rejected update", "error");
+                    adminLogout();
+                    return;
+                }
+
+                const resJson = await response.json();
+                if (resJson.status === "success") {
+                    showToast(resJson.message || "Product updated successfully!", "success");
+                    closeEditProductModal();
+                    await fetchCatalog();
+                    await loadAdminAnalytics();
+                } else {
+                    showToast(resJson.message || "Failed to update product", "error");
+                }
+            } catch (err) {
+                console.error("Edit product error", err);
+                showToast("Network error updating product", "error");
+            }
+        }
+
+        async function deleteProductItem(id, title) {
+            if (!confirm(`Are you sure you want to delete "${title}" (#${id}) from inventory? This will remove it from the store catalog permanently.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/products/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': adminToken
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+
+                if (response.status === 401) {
+                    showToast("Unauthorized: Admin middleware rejected deletion", "error");
+                    adminLogout();
+                    return;
+                }
+
+                const resJson = await response.json();
+                if (resJson.status === "success") {
+                    showToast(resJson.message || "Product deleted successfully!", "success");
+                    await fetchCatalog();
+                    await loadAdminAnalytics();
+                } else {
+                    showToast(resJson.message || "Failed to delete product", "error");
+                }
+            } catch (err) {
+                console.error("Delete product error", err);
+                showToast("Network error deleting product", "error");
+            }
+        }
+
+        // ==========================================
+        // CATEGORY MANAGEMENT CONTROLLER
+        // ==========================================
+        function openCategoriesModal() {
+            renderCategoriesModalList();
+            document.getElementById("newCatKey").value = "";
+            document.getElementById("newCatLabel").value = "";
+            const modal = document.getElementById("manageCategoriesModal");
+            if (modal) modal.style.display = "flex";
+        }
+
+        function closeCategoriesModal() {
+            const modal = document.getElementById("manageCategoriesModal");
+            if (modal) modal.style.display = "none";
+        }
+
+        function renderCategoriesModalList() {
+            const container = document.getElementById("categoriesListContainer");
+            if (!container) return;
+
+            let html = "";
+            categories.forEach(cat => {
+                const count = catalog.filter(i => i.type === cat.key).length;
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: white; border: 1px solid #e2e8f0; border-radius: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: #eff6ff; color: #2563eb; font-family: monospace;">${escapeHtml(cat.key)}</span>
+                            <strong style="font-size: 13.5px; color: var(--text-main);">${escapeHtml(cat.label)}</strong>
+                        </div>
+                        <span style="font-size: 12px; font-weight: 700; color: #64748b; background: #f8fafc; padding: 2px 10px; border-radius: 9999px; border: 1px solid #e2e8f0;">${count} Products</span>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        async function submitAddCategory() {
+            const key = document.getElementById("newCatKey").value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
+            const label = document.getElementById("newCatLabel").value.trim();
+
+            if (!key) {
+                showToast("Please provide category slug/key", "error");
+                return;
+            }
+            if (!label) {
+                showToast("Please provide display label", "error");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/categories/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': adminToken
+                    },
+                    body: JSON.stringify({ key: key, label: label })
+                });
+
+                if (response.status === 401) {
+                    showToast("Unauthorized: Admin key required", "error");
+                    adminLogout();
+                    return;
+                }
+
+                const resJson = await response.json();
+                if (resJson.status === "success") {
+                    showToast(resJson.message || "Category added successfully!", "success");
+                    document.getElementById("newCatKey").value = "";
+                    document.getElementById("newCatLabel").value = "";
+                    await fetchCategories();
+                    renderCategoriesModalList();
+                    renderBrandFilterChips();
+                    updateMetrics();
+                } else {
+                    showToast(resJson.message || "Failed to create category", "error");
+                }
+            } catch (err) {
+                console.error("Add category error", err);
+                showToast("Network error creating category", "error");
             }
         }
 

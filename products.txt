@@ -1,0 +1,6 @@
+1|iPhone 15|Apple|270000|5|electronics|1
+2|S23 Ultra|Samsung|240000|4|electronics|2
+3|Headphones|Sony|45000|8|electronics|1
+4|Hoodie|Nike|6500|15|clothing|L
+5|Tracksuit|Adidas|8500|10|clothing|M
+6|Formal Shirt|Outfitters|4200|12|clothing|XL
